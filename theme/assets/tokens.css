@@ -130,7 +130,9 @@
   --aura-h: 440px;          /* topbar 44 + masthead 396 */
 
   --topbar-h: 44px;
-  --sidebar-w: 300px;
+  --sidebar-w: 300px;      /* the panel's own width */
+  --shell-inset: var(--sidebar-w);   /* what main is pushed by; 0 when the
+                                        panel is closed or floating */
 
   /* NO PROSE MEASURE, and this is a measured decision rather than an
      oversight. A 72ch cap was tried, then the two references this workshop

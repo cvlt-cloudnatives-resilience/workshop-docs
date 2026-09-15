@@ -581,6 +581,16 @@ def render_sidebar(pages):
             + "".join(rows) + "</nav>" + tally + "</aside>")
 
 
+NAV_SVG = (
+    '<svg class="i-bars" viewBox="0 0 24 24" width="17" height="17" '
+    'fill="none" stroke="currentColor" stroke-width="1.8" '
+    'stroke-linecap="round" aria-hidden="true">'
+    '<path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>'
+    '<svg class="i-close" viewBox="0 0 24 24" width="17" height="17" '
+    'fill="none" stroke="currentColor" stroke-width="1.8" '
+    'stroke-linecap="round" aria-hidden="true">'
+    '<path d="M6 6l12 12M18 6L6 18"/></svg>')
+
 # Named because the landing page uses them too. One shows at a time, and it
 # names the DESTINATION: in light you see the moon you are going to.
 SUN_SVG = (
@@ -602,6 +612,12 @@ def render_topbar(ws, brand):
     inlined by the build so the file stays self-contained."""
     return (
         '<header id="topbar">'
+        # Contents first, because it is the control that gets you anywhere.
+        # Hidden until JS adds .routed: without a router it would toggle a
+        # sidebar whose links the page has already rendered inline.
+        '<button id="navtoggle" type="button" aria-controls="sidebar" '
+        'aria-expanded="true" aria-label="Hide contents">' + NAV_SVG +
+        '</button>'
         f'<a class="brand" href="#/overview">'
         f'<img class="brand-logo" src="{brand["mark"]}" alt="">'
         f'<span class="brand-name">{esc(ws["title"])}</span></a>'
@@ -653,6 +669,7 @@ try {
 {{TOPBAR}}
 <div class="shell">
 {{SIDEBAR}}
+<div id="nav-scrim" hidden></div>
 <main id="main" tabindex="-1">
 {{PAGES}}
 </main>

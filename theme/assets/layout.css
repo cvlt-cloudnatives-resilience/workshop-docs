@@ -23,6 +23,25 @@
   background-repeat: no-repeat;
   box-shadow: none;          /* the bar and the masthead are one surface */
 }
+/* Hidden without JS: the router is what makes a contents panel meaningful,
+   and .routed is how JS announces itself. */
+#navtoggle { display: none; }
+.routed #navtoggle {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0; flex: none;
+  margin-left: -4px;
+  background: transparent; color: var(--topbar-fg);
+  border: 0; border-radius: var(--radius-md); cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+#navtoggle:hover { background: rgba(255, 255, 255, 0.12);
+  color: var(--on-dark); }
+#navtoggle:focus-visible { outline: 2px solid var(--topbar-name);
+  outline-offset: 2px; }
+#navtoggle .i-close { display: none; }
+:root[data-nav="open"] #navtoggle .i-bars { display: none; }
+:root[data-nav="open"] #navtoggle .i-close { display: block; }
+
 .brand {
   display: flex; align-items: center; gap: 8px;
   font-size: 14px; font-weight: 600; color: var(--on-dark);
@@ -69,13 +88,28 @@
   :root:not([data-theme="light"]) .theme-btn .i-sun  { display: block; }
 }
 
-/* ---- sidebar ---- */
+/* ---- sidebar ----
+   --sidebar-w is the PANEL's width; --shell-inset is what main is pushed
+   by. They were one value until the panel could be closed, and they differ
+   whenever it is: closed at any width, and open at narrow, where it floats
+   over the page instead of displacing it. */
 #sidebar {
   position: fixed; top: var(--topbar-h); bottom: 0; left: 0;
   z-index: 5;      /* above the Overview's 100vw aura, which is z-index 0 */
   width: var(--sidebar-w); overflow-y: auto;
   background: var(--bg); border-right: 1px solid var(--line);
   padding: 12px 0 24px;
+  transition: transform 200ms ease;
+}
+:root[data-nav="closed"] #sidebar { transform: translateX(-100%); }
+@media (prefers-reduced-motion: reduce) {
+  #sidebar { transition: none; }
+}
+
+/* Only ever seen at narrow, where the panel floats. */
+#nav-scrim {
+  position: fixed; inset: var(--topbar-h) 0 0 0; z-index: 4;
+  background: rgba(0, 5, 59, 0.44);
 }
 .nav-act {
   display: flex; align-items: baseline; gap: 8px;
@@ -135,7 +169,7 @@ main { padding: 0 40px 64px; }
 .page { padding: 24px 0 24px; }
 
 @media (min-width: 881px) {
-  main { margin-left: var(--sidebar-w); }
+  main { margin-left: var(--shell-inset); transition: margin-left 200ms ease; }
   /* The column is CENTERED in the space beside the sidebar rather than
      pinned to it: 400px of empty space all on one side reads as a layout
      fault, while balanced margins read as a measure, which is what it is.
@@ -144,9 +178,21 @@ main { padding: 0 40px 64px; }
      2026-08-18 as duplicating an eleven-entry sidebar. */
   main > .page { max-width: var(--column); margin-inline: auto; }
 }
+@media (prefers-reduced-motion: reduce) {
+  main { transition: none; }
+}
+
+:root[data-nav="closed"] { --shell-inset: 0px; }
 
 @media (max-width: 880px) {
-  #sidebar { display: none; }
+  /* Last word on --shell-inset: at narrow the panel never displaces main,
+     whatever data-nav says. Source order is what makes this win over the
+     :root default, which has the same specificity. */
+  :root { --shell-inset: 0px; }
+  /* Closed unless asked for, and it floats over the page when asked for:
+     300px of panel plus a column will not both fit. */
+  #sidebar { transform: translateX(-100%); z-index: 9; box-shadow: var(--shadow); }
+  :root[data-nav="open"] #sidebar { transform: translateX(0); }
   #topbar-here { display: block; }
   .brand-name, .topbar-wordmark { display: none; }
   /* the wordmark is gone, so the divider it carried goes with it */
@@ -161,7 +207,7 @@ main { padding: 0 40px 64px; }
 /* ---- print: the guide doubles as the handout. Chrome off, everything
        expanded, callouts keep their rules. ---- */
 @media print {
-  #topbar, #sidebar, .pager, .copy, .skip { display: none !important; }
+  #topbar, #sidebar, #nav-scrim, .pager, .copy, .skip { display: none !important; }
   .routed main > .page { display: block !important; }
   /* PAPER IS LIGHT WHETHER OR NOT THE READER IS. Without this, printing
      from dark mode puts Fog-coloured text on white and the page comes out
@@ -217,13 +263,11 @@ main { padding: 0 40px 64px; }
   background: var(--aura);
   background-origin: border-box;
   background-size: 100vw var(--aura-h);
-  background-position: calc(-1 * var(--sidebar-w)) calc(-1 * var(--topbar-h));
+  background-position: calc(-1 * var(--shell-inset)) calc(-1 * var(--topbar-h));
   background-repeat: no-repeat;
 }
-@media (max-width: 880px) {
-  /* the sidebar is hidden here, so main already starts at viewport x=0 */
-  .at-overview main { background-position: 0 calc(-1 * var(--topbar-h)); }
-}
+/* At narrow --shell-inset is already 0, so the generic rule is correct and
+   the override this replaced is no longer needed. */
 #page-overview {
   padding-top: 0;          /* flush to the topbar: they are one surface */
 }

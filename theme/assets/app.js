@@ -15,6 +15,15 @@
     catch (e) { /* private mode: resume off, everything else works */ }
   }
 
+  /* ---- the contents panel's elements, declared before the router because
+     show() consults them on the very first route ---- */
+  var navBtn = document.getElementById('navtoggle');
+  var scrim = document.getElementById('nav-scrim');
+  var NARROW = window.matchMedia ?
+    window.matchMedia('(max-width: 880px)') : null;
+
+  function narrow() { return NARROW ? NARROW.matches : false; }
+
   /* ---- router ---- */
   var pages = Array.prototype.slice.call(
     document.querySelectorAll('main > .page'));
@@ -45,6 +54,9 @@
        painted on `main` so it can share the topbar's viewport origin. */
     document.documentElement.classList.toggle(
       'at-overview', page.dataset.route === '#/overview');
+    /* A chosen page is the drawer's purpose; leaving it open over the page
+       it just navigated to would hide the thing it was asked for. */
+    if (narrow() && navOpen()) { setNav(false); }
     here.textContent = page.dataset.title;
     document.title = page.dataset.title + ' · ' + brandName;
     var state = load();
@@ -71,6 +83,11 @@
   /* ---- keyboard: mirrors the pager ---- */
   document.addEventListener('keydown', function (e) {
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return; }
+    if (e.key === 'Escape' && narrow() && navOpen()) {
+      setNav(false);
+      if (navBtn) { navBtn.focus(); }
+      return;
+    }
     var i = currentIndex();
     if (i === -1) { return; }
     if (e.key === 'ArrowRight' && i < routes.length - 1) {
@@ -79,6 +96,53 @@
       location.hash = routes[i - 1];
     }
   });
+
+  /* ---- contents panel. One attribute, read differently at each width:
+     wide it displaces main and defaults open, narrow it floats over the
+     page behind a scrim and defaults closed. The button is the only way
+     back to the contents below 880px. ---- */
+  function setNav(open) {
+    document.documentElement.setAttribute(
+      'data-nav', open ? 'open' : 'closed');
+    if (navBtn) {
+      navBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      navBtn.setAttribute('aria-label',
+        open ? 'Hide contents' : 'Show contents');
+    }
+    if (scrim) { scrim.hidden = !(open && narrow()); }
+    /* Wide is a layout preference worth keeping; narrow is a transient
+       overlay, and reopening a drawer on every page load would be wrong. */
+    if (!narrow()) {
+      var state = load();
+      state.nav = open ? 'open' : 'closed';
+      save(state);
+    }
+  }
+
+  function navOpen() {
+    return document.documentElement.getAttribute('data-nav') === 'open';
+  }
+
+  if (navBtn) {
+    setNav(narrow() ? false : load().nav !== 'closed');
+
+    navBtn.addEventListener('click', function () { setNav(!navOpen()); });
+    if (scrim) {
+      scrim.addEventListener('click', function () {
+        setNav(false);
+        navBtn.focus();
+      });
+    }
+    /* Crossing the breakpoint re-reads the default rather than carrying a
+       state that means something else on the other side of it. */
+    if (NARROW) {
+      var onWidth = function () {
+        setNav(narrow() ? false : load().nav !== 'closed');
+      };
+      if (NARROW.addEventListener) { NARROW.addEventListener('change', onWidth); }
+      else if (NARROW.addListener) { NARROW.addListener(onWidth); }
+    }
+  }
 
   /* ---- theme. The <head> script already stamped any stored choice before
      the first paint; this only handles pressing the button and keeping the
