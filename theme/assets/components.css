@@ -1,0 +1,462 @@
+/* One block per component, in reading order. Quiet by default: the step
+   rail, the ✓/✗ pair, and the codename are the only elements allowed to
+   ask for attention. */
+
+/* ---- landing header ---- */
+/* A deck, not a caption. This was 15px -- smaller than the 16px body it
+   introduces, which is backwards: on an editorial page the standfirst is the
+   second-loudest thing after the title. */
+.standfirst { color: var(--muted); font-size: 19px; line-height: 1.5;
+  letter-spacing: -0.005em;
+  margin-top: 14px; max-width: 46rem; }
+.mast-meta { color: var(--muted); font-family: var(--f-mono);
+  font-size: 12px; }
+.mast-meta strong { color: var(--ink); font-family: var(--f-mono); }
+.codename {
+  display: inline-block; margin: 12px 0 4px; font-family: var(--f-mono);
+  font-size: 13px; padding: 8px 12px; background: var(--bg);
+  border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.codename span { font-size: 11px; letter-spacing: 0.10em;
+  color: var(--muted); margin-right: 8px; }
+.codename.unset { color: var(--muted); font-style: italic; }
+
+/* ---- breadcrumb, kicker, page header ---- */
+.crumb {
+  font-size: 12px; color: var(--muted); margin: 0 0 20px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.crumb a { color: var(--accent); text-decoration: none; }
+.crumb a:hover { text-decoration: underline; }
+.crumb-sep { margin: 0 6px; color: var(--line); }
+.crumb b { color: var(--ink); font-weight: 600; }
+
+/* The kicker carries a short aura accent, so the nine content pages belong
+   to the same system as the Overview's masthead without repeating its band. */
+.kicker {
+  position: relative; padding-top: 18px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+  color: var(--accent); margin: 0 0 4px;
+}
+.kicker::before {
+  content: ""; position: absolute; top: 0; left: 0;
+  width: 104px; height: 4px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--aura-base) 0%, var(--accent) 58%,
+                                     var(--rose) 100%);
+}
+.page-head {
+  display: flex; align-items: baseline; gap: 16px;
+  margin-bottom: 30px;    /* space, not a rule -- see base.css */
+}
+/* ---- the step rail: a command opens a step, its checks hang off it.
+       Structure derived from authored order, never invented content. ---- */
+.steps { margin: 16px 0; }
+.step {
+  display: grid; grid-template-columns: 28px 1fr; gap: 0 16px;
+  position: relative; padding-bottom: 12px;
+}
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: var(--bg);
+  font-size: 13px; font-weight: 600; line-height: 28px;
+  text-align: center; margin-top: 4px;
+}
+.step::before {
+  content: ""; position: absolute; left: 13.5px; top: 36px; bottom: -8px;
+  width: 1px; background: var(--line);
+}
+.step:last-child { padding-bottom: 0; }
+.step:last-child::before { display: none; }
+.step-body { min-width: 0; }
+.step-body > :first-child { margin-top: 4px; }
+
+/* ---- command block: DARK, because this guide holds exactly two kinds of
+       content -- what a human reads and what a machine says -- and until
+       2026-08-19 they looked identical. Midnight is the brand primary, so
+       commands cost nothing in compliance and gain a rhythm that carries
+       meaning: dark is the machine, light is the human, and the ✓ box in
+       between quotes the machine's answer.
+
+       The $ prompt stays a pseudo-element, so a manual select-and-copy can
+       never capture it. The whole block is a copy target (app.js). ---- */
+.cmd {
+  /* A TERMINAL IS MIDNIGHT IN BOTH THEMES. This said var(--ink), which
+     was only ever right while ink meant Midnight: in dark mode ink is
+     Fog, and the terminal block came out pale with ghost text on it. */
+  background: var(--aura-base); border: 1px solid var(--aura-base);
+  border-radius: var(--radius-md); margin: 12px 0; overflow: hidden;
+  cursor: pointer; transition: box-shadow 160ms ease, border-color 160ms ease;
+}
+.cmd:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+.cmd-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 14px; font-family: var(--f-mono); font-size: 12px;
+  color: var(--topbar-dim);
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+/* Commands WRAP, they do not scroll sideways. `az login --service-principal`
+   is 96 characters and clipped at the container edge, and macOS draws no
+   scrollbar until you scroll — so the tail of the longest command on the page
+   was invisible to anyone reading rather than copying. Wrapping at spaces
+   keeps every token intact; overflow-x stays as the fallback for a single
+   token wider than the box. */
+.cmd pre {
+  padding: 14px; overflow-x: auto; color: var(--on-dark);
+  font-variant-numeric: tabular-nums;
+  white-space: pre-wrap;
+}
+.cmd pre code { display: block; padding-left: 1.35em; text-indent: -1.35em; }
+.cmd pre code::before {
+  content: "$"; color: var(--prompt); margin-right: 10px;
+}
+.copy {
+  font: inherit; color: var(--topbar-dim); background: none;
+  border: 1px solid rgba(255, 255, 255, 0.18); border-radius: var(--radius-sm);
+  padding: 2px 9px; cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease,
+              background-color 160ms ease;
+}
+.copy:hover { color: var(--on-dark); border-color: var(--topbar-name);
+  background: rgba(255, 255, 255, 0.08); }
+.copy:active { transform: translateY(1px); }
+.cmd.copied { animation: copied-pulse 0.35s ease-out; }
+@keyframes copied-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(132, 72, 150, 0.45); }
+  100% { box-shadow: 0 0 0 8px rgba(132, 72, 150, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cmd.copied { animation: none; }
+}
+
+/* ---- diagnostic pair: quiet callouts, adjacent, unmistakable ---- */
+/* THE DIAGNOSTIC INSTRUMENT. ✓ what you should see, ⏱ how long, ✗ what to
+   do if not: one object, hairline-divided, attached to the command above it.
+   It used to be three separately-rounded bands with gaps between them, which
+   read as three unrelated alerts that happened to be adjacent. Each row keeps
+   its own color, because the loudness is deliberate: stalling is what kills
+   a workshop, so this stays the most visually distinct thing on the page. */
+.diag {
+  margin: 10px 0 18px; overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+}
+.diag-row { padding: 10px 14px 12px; border-left: 3px solid; }
+.diag-row + .diag-row { border-top: 1px solid var(--line); }
+.diag-yes { border-left-color: var(--yes); background: var(--yes-tint); }
+.diag-no { border-left-color: var(--no); background: var(--no-tint); }
+.diag-clock { border-left-color: var(--line); background: var(--clock-tint); }
+.diag-label { margin: 0; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.08em; }
+.diag-yes .diag-label { color: var(--yes); }
+.diag-no .diag-label { color: var(--no); }
+.diag-clock .diag-label { color: var(--clock); }
+.diag-mark { margin-right: 7px; }
+.diag-row pre { margin-top: 6px; overflow-x: auto; line-height: 1.55;
+  color: var(--ink); }
+.diag-text { margin: 6px 0 0; color: var(--ink); }
+.v-yes { color: var(--yes); font-weight: 700; }
+.v-no { color: var(--no); font-weight: 700; }
+
+/* ---- aside: the quietest block on the page ---- */
+.aside { border-left: 2px solid var(--line); padding: 2px 0 2px 14px;
+  margin: 16px 0; color: var(--muted); }
+.aside-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); margin: 0; }
+.aside p { margin: 10px 0; font-size: 15px; line-height: 24px; }
+.aside pre { background: var(--code-bg); border: 1px solid
+  var(--code-border); border-radius: var(--radius-sm);
+  padding: 8px 12px; overflow-x: auto; margin: 8px 0; }
+
+/* ---- ASCII panel: scrolls in its own container, never wraps ---- */
+.panel {
+  background: var(--code-bg); border: 1px solid var(--code-border);
+  border-radius: var(--radius-md); padding: 12px 14px;
+  overflow-x: auto; margin: 12px 0; line-height: 1.6;
+}
+
+/* ---- figure: build-time inlined image ---- */
+/* A diagram that shrinks with the viewport becomes illegible on a phone,
+   so below min-width the figure SCROLLS instead: the page's standing rule
+   for wide content. min-width beats max-width by spec, which is exactly
+   the wanted behavior: cap at the column, floor at legibility. */
+figure { margin: 16px 0; overflow-x: auto; }
+/* svg as well as img: the five diagrams are inlined as markup, which is what
+   lets them go through tokens at all. They keep the LIGHT palette in both
+   themes -- see --fig-* in tokens.css -- so on a dark page a figure reads as
+   a light plate set into the text. The border is --fig-line for the same
+   reason: it belongs to the plate, not to the page.
+   min-width keeps a wide diagram legible and lets `figure { overflow-x:
+   auto }` scroll it rather than squashing it. */
+figure img, figure svg {
+  max-width: 100%; min-width: 560px; display: block; height: auto;
+  border: 1px solid var(--fig-line); border-radius: var(--radius-md);
+}
+figcaption { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* ---- do/learn strip: the chapter's orientation, first thing on the page.
+       Two labeled rows, hairline box, no tint: informative, not loud. ---- */
+/* The strip is three labeled lines, not a card. The accent-colored labels
+   already say "this is the orientation"; a border around them said it twice. */
+.strip {
+  padding: 0; margin: 4px 0 30px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.strip-row { display: grid; grid-template-columns: 78px 1fr; gap: 14px;
+  align-items: baseline; }
+.strip-row span { font-size: 11px; font-weight: 700;
+  letter-spacing: 0.10em; color: var(--accent); }
+.strip-row p { margin: 0; }
+
+/* ---- checkpoint card: quiet consolidation at a chapter's end ---- */
+.mark {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  padding: 16px 18px 14px; margin: 34px 0 12px; background: var(--code-bg);
+}
+.mark::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--aura-base) 0%, var(--accent) 58%,
+                                     var(--rose) 100%);
+}
+.mark-title { margin: 0 0 4px; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.mark p { margin: 4px 0; font-size: 14px; }
+.mark pre { overflow-x: auto; margin: 8px 0; }
+
+/* ---- reveal: collapsed answers; a details block styled like an aside ---- */
+.reveal { border-left: 2px solid var(--line); padding: 2px 0 2px 14px;
+  margin: 8px 0 16px; color: var(--muted); }
+.reveal summary { cursor: pointer; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.reveal summary:hover { color: var(--ink); }
+.reveal div { margin-top: 6px; }
+.reveal p { margin: 6px 0; font-size: 13px; line-height: 20px; }
+.reveal pre { background: var(--code-bg); border: 1px solid
+  var(--code-border); border-radius: var(--radius-sm);
+  padding: 8px 12px; overflow-x: auto; margin: 8px 0; }
+
+/* ---- pager: both right, ghost prev, solid next with title + time ---- */
+.pager {
+  display: flex; justify-content: flex-end; align-items: center; gap: 8px;
+  margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line);
+}
+.pager a {
+  font-size: 14px; text-decoration: none;
+  border-radius: var(--radius-md); padding: 8px 16px;
+}
+.pager-prev { color: var(--muted); border: 1px solid var(--line); }
+.pager-prev:hover { color: var(--ink); border-color: var(--muted); }
+.pager-next {
+  background: var(--accent); color: var(--bg); font-weight: 600;
+  border: 1px solid var(--accent);
+}
+.pager-next:hover { background: var(--accent-dark);
+  border-color: var(--accent-dark); }
+
+/* ---- inherited band: what a ROOM participant arrives holding, carried
+       from the SOLO chapters that build did not render. Sits above the
+       page head, quieter than a checkpoint because it is not theirs. ---- */
+.inherited {
+  border: 1px dashed var(--line); border-radius: var(--radius-md);
+  padding: 10px 14px 2px; margin: 0 0 20px; background: var(--code-bg);
+}
+.inherited-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--muted); margin: 0 0 4px;
+}
+.inherited .mark { border: 0; background: none; padding: 0; margin: 4px 0; }
+
+/* ---- folded aside (ROOM build): the facilitator's material, present but
+       not competing with them for the room's attention. ---- */
+.aside-fold { padding-left: 14px; }
+.aside-fold > summary {
+  cursor: pointer; list-style: none;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted);
+}
+.aside-fold > summary::-webkit-details-marker { display: none; }
+.aside-fold > summary::after { content: " ▸"; }
+.aside-fold[open] > summary::after { content: " ▾"; }
+
+/* ---- definition list (```list): a label column and PROSE that flows.
+       The label column sizes to its own longest label, so a list of short
+       keys stays tight and one with "Commvault Cloud" in it still lines up.
+       Stacks under 560px rather than squeezing the sentence. ---- */
+/* THE GRID IS ON THE CONTAINER, not the row. With it on the row, max-content
+   was evaluated per row, so every row sized its own key column and one list
+   showed four different text-start positions. `display: contents` lets the
+   keys and values of every row participate in ONE shared grid. */
+.deflist { margin: 16px 0; display: grid;
+  grid-template-columns: max-content minmax(0, 1fr); gap: 12px 24px;
+  align-items: baseline; }
+.dl-row { display: contents; }
+.dl-key { font-family: var(--f-mono); font-size: 14px; color: var(--ink); }
+.dl-val { min-width: 0; }
+.dl-val p { margin: 0 0 8px; }
+.dl-val p:last-child { margin-bottom: 0; }
+@media (max-width: 620px) {
+  .deflist { grid-template-columns: 1fr; gap: 4px; }
+  .dl-key { color: var(--muted); margin-top: 10px; }
+}
+
+/* ---- official Commvault icons on a definition list. Sanctioned by the
+       brand primer: "iconography can be leveraged wherever complex industry
+       topics may benefit from a visual aid." Used on exactly two lists --
+       what the lab is built from, and what you used and what it is called --
+       because both ask a newcomer to map an abstract concept to a name. ---- */
+/* 30px, not 22px. The source files are a 60px viewBox with real detail --
+   a monitor with a screen, a padlock with a shackle -- and below about 28px
+   they read as dark blobs rather than as anything. */
+.deflist-iconed { grid-template-columns: 30px max-content minmax(0, 1fr);
+  gap: 14px 18px; }
+.dl-icon { width: 30px; height: 30px; display: block; align-self: start;
+  margin-top: -3px; }
+@media (max-width: 620px) {
+  /* THREE CHILDREN, TWO COLUMNS. Dropping to `30px 1fr` left the row with
+     nowhere to put its third child, so auto-placement wrapped the VALUE into
+     the next row's 30px icon column and clipped it to 30px wide -- the text
+     was not short, the column was. Sending the value to column 2 puts it on
+     its own line under the label, which is the same stack the plain list
+     already used. */
+  .deflist-iconed { grid-template-columns: 30px minmax(0, 1fr); }
+  .deflist-iconed .dl-val { grid-column: 2 / -1; }
+  .deflist-iconed .dl-key { color: var(--muted); }
+}
+
+/* ---- a carded definition list (```list card). Used ONCE, on the verdict
+       trail, because that is the workshop's completion moment: one command,
+       one workload, four opposite answers. Nothing else is carded, which is
+       what makes it read. ---- */
+.deflist-card {
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  padding: 18px 20px; background: var(--code-bg);
+}
+
+/* ---- ```statement: display type, for the one or two lines the workshop
+       exists to make somebody repeat. "You gate on tests. You gate on
+       security scans. You do not gate on recoverability." is the thesis of
+       the whole day and it was rendering as grey mono in a box identical to
+       every other panel. The bolded line takes Rose, because it is the one
+       that is not true yet. ---- */
+/* ---- THE ONE FULL-BLEED MOMENT ----------------------------------------
+   There is exactly ONE ```statement in the guide and it carries the thesis,
+   so it gets the only break in the column: the masthead's own surface, used
+   a second time, on the page everyone lands on. A repeat is a system; a new
+   dark surface would be a stripe. If a third one ever appears, this rule is
+   wrong and the fence is being overused.
+
+   GEOMETRY, and why this is not the aura bug again. `main` starts at
+   --sidebar-w and pads 40px each side, and the page column is CENTERED
+   inside it (layout.css). So the column's center IS the content area's
+   center, and left:50% + translateX(-50%) lands exactly on it. The aura bug
+   was the opposite case: there I aligned to the VIEWPORT center while the
+   containing block sat 150px off it. Width is the content area with the
+   sidebar excluded; below 880px the sidebar is gone and it is the viewport.
+
+   The TEXT stays on the column grid while the BACKGROUND bleeds, so the
+   thesis still starts at the same left edge as every paragraph above it. ---- */
+/* A heading that introduces the band must stay attached to it; 52px of h2
+   margin plus the band's own top padding orphaned it on a field of white. */
+h2 + .statement, h3 + .statement { margin-top: 22px; }
+.statement {
+  position: relative; left: 50%; transform: translateX(-50%);
+  width: calc(100vw - var(--sidebar-w));
+  margin: 48px 0 44px; padding: 52px 40px;
+  /* the full-bleed panel is a Midnight surface with white type on it,
+     in both themes: see .cmd above for why not var(--ink) */
+  background: var(--aura-base);
+}
+.statement p {
+  max-width: var(--column); margin: 0 auto;
+  font-size: 34px; line-height: 1.3; font-weight: 700;
+  letter-spacing: -0.018em; color: var(--on-dark); text-wrap: balance;
+}
+/* rose at full strength is 4.15:1 on white and unusable there, but this is
+   Midnight: the hero card's lighter rose is already the answer for text on
+   this exact surface, so it is reused rather than re-derived. */
+.statement p strong { font-weight: 700; color: var(--on-dark-no); }
+
+@media (max-width: 880px) { .statement { width: 100vw; } }
+@media (max-width: 620px) {
+  .statement { padding: 36px 20px; margin: 36px 0 32px; }
+  .statement p { font-size: 26px; }
+}
+/* On paper there is no aura and no ink to spare. */
+@media print {
+  .statement { background: none; padding: 0; width: auto;
+    left: 0; transform: none; }
+  .statement p { color: var(--ink); }
+  .statement p strong { color: var(--ink); }
+}
+
+/* ---- a verdict row in a definition list takes the verdict's own color as a
+       rule, so four opposite answers read as a shape and not as four
+       identical lines. ---- */
+.dl-key.dl-yes, .dl-key.dl-no {
+  border-left: 3px solid var(--line); padding-left: 12px; margin-left: -15px;
+}
+.dl-key.dl-yes { border-left-color: var(--yes); }
+.dl-key.dl-no  { border-left-color: var(--no); }
+
+
+/* ---- MOTION. 160ms on everything a reader touches. There was none at all
+       until 2026-08-19, so every hover snapped. The research on Stripe,
+       Linear and Vercel puts hover states and focus rings in the same
+       sentence as the craft; this is that sentence, applied. ---- */
+.reveal summary, .aside-fold > summary, .pager a, .crumb a {
+  transition: color 160ms ease, background-color 160ms ease,
+              border-color 160ms ease;
+}
+.mark, .deflist-card, .inherited {
+  transition: box-shadow 160ms ease;
+}
+.deflist-card:hover { box-shadow: var(--shadow); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}
+
+
+
+/* ---- the checkpoint: how a chapter ends -----------------------------------
+   Google's labs close a section with `Check my progress`, a button that calls
+   a server and tells you nothing when it says no. This closes with the verdict
+   a real command gives, which differs per chapter and explains itself. Quiet
+   by design: it is a full stop, not a scoreboard. */
+.checkpoint {
+  margin: 40px 0 8px; padding: 18px 20px 16px;
+  border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  border-radius: var(--radius-md); background: var(--code-bg);
+}
+.cp-eyebrow {
+  margin: 0 0 6px; font-family: var(--f-mono); font-size: 11px;
+  font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent);
+}
+.cp-when { margin: 0; color: var(--ink); }
+.cp-mark {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 14px; padding-top: 13px;
+  border-top: 1px solid var(--line);
+  font-size: 14px; color: var(--muted); cursor: pointer;
+  user-select: none;
+}
+.cp-mark input {
+  appearance: none; -webkit-appearance: none;
+  width: 16px; height: 16px; margin: 0; flex: none;
+  border: 1.5px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--bg); cursor: pointer; position: relative;
+}
+.cp-mark:hover input { border-color: var(--accent); }
+.cp-mark input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cp-mark input:checked { background: var(--accent); border-color: var(--accent); }
+.cp-mark input:checked::after {
+  content: ""; position: absolute; left: 5px; top: 1px;
+  width: 4px; height: 9px; border: solid var(--bg);
+  border-width: 0 2px 2px 0; transform: rotate(42deg);
+}
+.cp-mark input:checked + span { color: var(--accent); }
+
+/* On paper a checkbox is a box to tick with a pen, which is fine, but the
+   sidebar tally is not. */
+@media print { .nav-tally { display: none; } }

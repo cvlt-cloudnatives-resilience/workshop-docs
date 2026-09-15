@@ -1,0 +1,224 @@
+/* Design tokens. The only file where a color, font, or scale is defined.
+
+   EVERY VALUE HERE COMES FROM THE COMMVAULT BRAND IDENTITY SYSTEM, either
+   as a primary/secondary color or as a permitted tint or shade of one.
+   The primer's own words: "tints and shades of our primary and secondary
+   colors are available, and can be an effective way to add depth."
+
+     Midnight  #00053B     Crocus  #844896     Rose  #EA2C68
+     Black     #000000     Fog     #EAEAEA     White #FFFFFF
+     secondary, sparingly:  Water #3699F4   Grass #40B426   Sun #EEC901
+
+   Rose and Grass FAIL WCAG AA on white at full strength (4.15:1 and
+   2.70:1), so the verdict colors are the lightest shade of each that
+   passes. That is a brand-permitted shade, not an invented color.
+
+   The color budget:
+     crocus  -> kicker, active nav, step circles, links, Next
+     grass   -> the ✓ callout and PROMOTE/VALIDATED words, nothing else
+     rose    -> the ✗ callout and HOLD/THREATS words, nothing else
+     everything else is Midnight on White with Fog hairlines. */
+:root {
+  --bg:          #ffffff;   /* White */
+  --ink:         #00053b;   /* Midnight */
+  --muted:       #707391;   /* 44% tint of Midnight, lightest that holds AA */
+  --line:        #eaeaea;   /* Fog */
+
+  --accent:      #844896;   /* Crocus */
+  --accent-dark: #6d3a7c;   /* 82% shade of Crocus, for hover */
+  --accent-soft: #f5f0f7;   /* 92% tint of Crocus */
+  --rose:        #ea2c68;   /* Rose, at full strength: decorative only,
+                               never text. See --no for the AA shade. */
+
+  --yes:         #30881c;   /* 76% shade of Grass, 4.50:1 */
+  --yes-tint:    #f3faf1;   /* 94% tint of Grass */
+  --no:          #db2961;   /* 94% shade of Rose, 4.66:1 */
+  --no-tint:     #fdf2f5;   /* 94% tint of Rose */
+  --clock:       #707391;   /* Midnight tint */
+  --clock-tint:  #f7f7f7;   /* 62% tint of Fog */
+
+  --code-bg:     #f6f6f6;   /* 55% tint of Fog */
+  --code-border: #eaeaea;   /* Fog */
+  --prompt:      #c397d8;   /* Crocus tint: the $ on a Midnight terminal */
+
+  /* ON MIDNIGHT. Not the topbar's colours: the SURFACE's. The topbar, the
+     terminal blocks, the hero card, the Overview masthead and the full-bleed
+     statement panel are all Midnight in both themes, and text on them needs
+     the same answers regardless of which theme the page is in. These were
+     hard-coded in five places and then declared a third time as the dark
+     palette's --yes and --no, which is one fact with three homes. Declared
+     once here, never overridden by a theme. */
+  /* FIGURES DO NOT FOLLOW THE THEME, and that is the point. A diagram is an
+     illustration printed on the page, not a surface belonging to it. Themed,
+     the three-planes figure came out Midnight on Midnight: the card edge
+     disappeared, the hairlines around each plane went to nothing, and the
+     whole thing read as a floating mass rather than as a drawing. On a dark
+     page it should read as a light plate set into the text, which is what
+     every diagram in a printed book does.
+     These are the light palette, declared once and never overridden. */
+  --fig-bg:      #ffffff;
+  --fig-ink:     #00053b;
+  --fig-muted:   #707391;
+  --fig-line:    #eaeaea;
+  --fig-accent:  #844896;
+  --fig-yes:     #30881c;
+  --fig-no:      #db2961;
+
+  --on-dark:     #ffffff;
+  --on-dark-yes: #7fd48f;   /* Grass tint that holds on Midnight, 9.3:1 */
+  --on-dark-no:  #ff8fae;   /* Rose tint that holds on Midnight, 8.0:1 */
+
+  --topbar-fg:   #e2e3f1;   /* Midnight tint, on Midnight */
+  --topbar-dim:  #8b90b3;
+  --topbar-name: #c397d8;   /* Crocus tint, on Midnight */
+
+  /* TYPEFACE. The primer names Galano Grotesque primary and Arial as "the
+     approved system font ... available to use WITHOUT A LICENSE". Galano is
+     a licensed webfont and this build FAILS on any external reference,
+     because the guide has to open from file:// with the network off. Arial
+     is therefore the compliant choice AND the offline-safe one. */
+  --f-sans: Arial, Helvetica, sans-serif;
+  --f-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --shadow: 0 4px 14px rgba(0, 5, 59, 0.16);      /* tinted with Midnight */
+
+  /* GRADIENT AURA, defined once. The primer: "soft gradient shapes combine
+     to create a dynamic aura, symbolizing the abstract environment in which
+     data lives." Sized to topbar + masthead so the two elements paint ONE
+     continuous surface with no seam between them. */
+  /* BANDING. THIS GUIDE GETS PROJECTED. A two-stop gradient in 8-bit sRGB
+     bands visibly where it crosses hue, and a projector crushes the bottom
+     two stops of contrast, so the steps that are invisible on a laptop become
+     stripes on a wall in front of a room. Three fixes, all offline:
+
+       1. `in oklab` -- interpolate perceptually, so Midnight->Crocus->Rose
+          does not swing through a muddy middle and bunch its steps there.
+       2. more stops -- an extra stop in each ramp gives the renderer more
+          places to put a transition, which spreads the error.
+       3. NOISE -- 3% feTurbulence as a data URI, which dithers the boundary
+          below the eye's threshold. A data URI is not a request, so the
+          offline guard is untouched.
+
+     The noise layer sits FIRST so it lands on top of the color ramps. */
+  /* The aura is Midnight in BOTH themes: it is the brand's own dark
+     surface, and the topbar sits on it on every page. It used to end
+     `linear-gradient(var(--ink), var(--ink))`, which was correct only for as
+     long as --ink meant Midnight. In dark mode --ink is Fog, so the base
+     layer under the gradients would have turned the masthead white. */
+  --aura-base: #00053b;
+  --aura-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  --aura: var(--aura-noise),
+          radial-gradient(60% 120% at 82% 10% in oklab,
+                                               rgba(234, 44, 104, 0.55) 0%,
+                                               rgba(234, 44, 104, 0.34) 26%,
+                                               rgba(234, 44, 104, 0.14) 45%,
+                                               rgba(234, 44, 104, 0) 60%),
+          radial-gradient(55% 110% at 58% 32% in oklab,
+                                               rgba(132, 72, 150, 0.65) 0%,
+                                               rgba(132, 72, 150, 0.40) 28%,
+                                               rgba(132, 72, 150, 0.17) 47%,
+                                               rgba(132, 72, 150, 0) 62%),
+          radial-gradient(90% 140% at 10% 0% in oklab,
+                                               rgba(0, 5, 59, 1) 0%,
+                                               rgba(0, 5, 59, 0.96) 30%,
+                                               rgba(0, 5, 59, 0.92) 55%,
+                                               rgba(0, 5, 59, 0.91) 78%,
+                                               rgba(0, 5, 59, 0.9) 100%),
+          linear-gradient(var(--aura-base), var(--aura-base));
+  --aura-h: 440px;          /* topbar 44 + masthead 396 */
+
+  --topbar-h: 44px;
+  --sidebar-w: 300px;
+
+  /* NO PROSE MEASURE, and this is a measured decision rather than an
+     oversight. A 72ch cap was tried, then the two references this workshop
+     is modeled on were measured at 1512px:
+
+       disaster-recovery.workshop.aws   1020px prose, median 105 chars, 67% vw
+       codelabs.developers.google.com    856px prose, median  96 chars, 57% vw
+
+     Both run wide. Neither is edge-to-edge though: each has a container.
+     So the column is capped and PROSE FILLS IT, putting us between the two
+     at 960px and 63% of the viewport. */
+  --column: 60rem;
+}
+
+/* ---------------------------------------------------------------------------
+   DARK. The brand primer settles this rather than taste: "white and black are
+   the preferred background colors", the icon set ships a white variant for
+   dark surfaces, and the Gradient Aura is sanctioned as a background "to
+   highlight UI dashboards" -- the primer's own example of it, and the Tone
+   Guide's cover, are both Midnight with a rose aura. The brand shows itself
+   dark more often than light.
+
+   So this is not a second palette. It is the SAME six colors with ground and
+   ink swapped, and every accent here was already proven on Midnight inside
+   the masthead and the hero card before dark mode existed.
+
+   THE TWO BLOCKS BELOW MUST STAY IDENTICAL. CSS has no way to share one
+   declaration list between a media query and an attribute selector, so they
+   are written twice: once for a reader whose OS says dark and who has not
+   chosen, and once for a reader who pressed the button. A test compares them.
+
+   The guard `:root:not([data-theme="light"])` is what lets an explicit light
+   choice win on a dark OS.
+   ------------------------------------------------------------------------ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  --bg:          #00053b;   /* Midnight */
+  --ink:         #eaeaea;   /* Fog, 14.8:1 on Midnight */
+  --muted:       #8b90b3;   /* Midnight tint, 5.1:1 */
+  --line:        #1c2154;   /* Midnight, lifted, for hairlines */
+
+  --accent:      #c397d8;   /* Crocus tint, 6.9:1 — the topbar has used this
+                               on Midnight since the first build */
+  --accent-dark: #d9b8e6;   /* hover goes LIGHTER on a dark ground */
+  --accent-soft: #100d46;   /* Midnight with 12% Crocus, for the active row */
+  --rose:        #ea2c68;   /* unchanged: decorative, never text */
+
+  --yes:         var(--on-dark-yes);   /* the hero card's PROMOTE green */
+  --yes-tint:    #051339;   /* Midnight with 8% Grass */
+  --no:          var(--on-dark-no);    /* the hero card's HOLD rose */
+  --no-tint:     #13083f;   /* Midnight with 8% Rose */
+  --clock:       #8b90b3;
+  --clock-tint:  #0a0f33;
+
+  --code-bg:     #0a1046;   /* Midnight, lifted, so a code block reads as a
+                               surface rather than a hole */
+  --code-border: #1c2154;
+  --prompt:      #c397d8;   /* unchanged: it was already a Crocus tint on
+                               Midnight */
+
+  --shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg:          #00053b;   /* Midnight */
+  --ink:         #eaeaea;   /* Fog, 14.8:1 on Midnight */
+  --muted:       #8b90b3;   /* Midnight tint, 5.1:1 */
+  --line:        #1c2154;   /* Midnight, lifted, for hairlines */
+
+  --accent:      #c397d8;   /* Crocus tint, 6.9:1 — the topbar has used this
+                               on Midnight since the first build */
+  --accent-dark: #d9b8e6;   /* hover goes LIGHTER on a dark ground */
+  --accent-soft: #100d46;   /* Midnight with 12% Crocus, for the active row */
+  --rose:        #ea2c68;   /* unchanged: decorative, never text */
+
+  --yes:         var(--on-dark-yes);   /* the hero card's PROMOTE green */
+  --yes-tint:    #051339;   /* Midnight with 8% Grass */
+  --no:          var(--on-dark-no);    /* the hero card's HOLD rose */
+  --no-tint:     #13083f;   /* Midnight with 8% Rose */
+  --clock:       #8b90b3;
+  --clock-tint:  #0a0f33;
+
+  --code-bg:     #0a1046;   /* Midnight, lifted, so a code block reads as a
+                               surface rather than a hole */
+  --code-border: #1c2154;
+  --prompt:      #c397d8;   /* unchanged: it was already a Crocus tint on
+                               Midnight */
+
+  --shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+}

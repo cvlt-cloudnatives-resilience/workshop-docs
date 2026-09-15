@@ -1,0 +1,359 @@
+/* The shell: topbar over everything, sidebar left, full-width content.
+   Narrow (half-screen beside a terminal) collapses the sidebar and the
+   topbar carries position + codename instead. Light mode only.
+   Without JS every page renders stacked in order: the router only hides. */
+
+/* ---- topbar: identity left, codename right, progress as its bottom
+       edge. 10 hairline segments fill as pages are visited: the only
+       progress signal at half-screen, subliminal at full width. ---- */
+#topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 16px;
+  height: var(--topbar-h); padding: 0 16px;
+  color: var(--topbar-fg);
+  /* the top slice of the aura, so the bar and the Overview masthead are one
+     surface. On every other page it simply reads as a richer Midnight. */
+  background: var(--aura);
+  /* border-box, not the default padding-box: the bar has 16px of horizontal
+     padding, and sampling from the padding box would offset the gradient by
+     exactly that much against main's copy. */
+  background-origin: border-box;
+  background-size: 100vw var(--aura-h);
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  box-shadow: none;          /* the bar and the masthead are one surface */
+}
+.brand {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 600; color: var(--on-dark);
+  text-decoration: none; white-space: nowrap;
+}
+.brand-logo { display: block; width: 18px; height: 18px; }
+#topbar-here {
+  font-size: 13px; color: var(--topbar-fg); display: none;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.topbar-wordmark { display: block; height: 12px; width: auto; }
+
+/* THE THEME TOGGLE. margin-left:auto here, not on the wordmark: this pushes
+   the button right and the wordmark follows it, which is the one rule that
+   serves both layouts. Wide, it sits inboard of the Commvault mark with a
+   hairline between them so it does not read as part of the lockup. Below
+   880px the wordmark hides and the button inherits the edge, which is the
+   conventional top-right slot.
+   The topbar is Midnight in BOTH themes, so this control never changes
+   ground and needs no theme-specific colors of its own. */
+.theme-btn {
+  margin-left: auto;
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0; flex: none;
+  background: transparent; color: var(--topbar-fg);
+  border: 0; border-radius: var(--radius-md); cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.theme-btn:hover { background: rgba(255, 255, 255, 0.12);
+  color: var(--on-dark); }
+.theme-btn:focus-visible { outline: 2px solid var(--topbar-name); outline-offset: 2px; }
+.theme-btn + .topbar-wordmark {
+  margin-left: 14px; padding-left: 14px;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+/* One icon shows at a time, and it names the DESTINATION rather than the
+   current state: in light you see the moon you are going to. */
+.theme-btn .i-moon { display: block; }
+.theme-btn .i-sun  { display: none; }
+:root[data-theme="dark"] .theme-btn .i-moon { display: none; }
+:root[data-theme="dark"] .theme-btn .i-sun  { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-btn .i-moon { display: none; }
+  :root:not([data-theme="light"]) .theme-btn .i-sun  { display: block; }
+}
+
+/* ---- sidebar ---- */
+#sidebar {
+  position: fixed; top: var(--topbar-h); bottom: 0; left: 0;
+  z-index: 5;      /* above the Overview's 100vw aura, which is z-index 0 */
+  width: var(--sidebar-w); overflow-y: auto;
+  background: var(--bg); border-right: 1px solid var(--line);
+  padding: 12px 0 24px;
+}
+.nav-act {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 16px 16px 4px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.nav-act-name { flex: 1; }
+.nav-row {
+  display: flex; align-items: baseline; gap: 8px;
+  margin: 2px 8px; padding: 8px 8px; min-height: 36px;
+  border-radius: var(--radius-md);
+  color: var(--ink); text-decoration: none; font-size: 14px;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.nav-row:hover { background: var(--code-bg); }
+.nav-row.active {
+  background: var(--accent-soft); color: var(--accent); font-weight: 600;
+}
+.nav-num { font-family: var(--f-mono); font-size: 12px;
+  color: var(--muted); min-width: 16px; }
+.nav-row.active .nav-num { color: var(--accent); }
+.nav-name { flex: 1; }
+
+/* THE RUNG. Same dot language the engine prints: filled means cleared. Which
+   chapter you are ON is the .active highlight, so there is no third state to
+   draw. aria-hidden on the span -- the tick is announced by the checkbox at
+   the foot of the chapter, and repeating it here would read twice. */
+.nav-rung {
+  width: 7px; height: 7px; border-radius: 50%; flex: none;
+  align-self: center; margin-right: -2px;
+  border: 1.5px solid var(--line); background: transparent;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+/* Overview, Setup and the closing page reserve the slot without
+   claiming a rung: a hollow circle would read as "chapter not done". */
+.nav-rung-none { border-color: transparent; }
+.nav-row.done .nav-rung { background: var(--accent); border-color: var(--accent); }
+.nav-row.done .nav-num { color: var(--accent); }
+.nav-row.active .nav-rung { border-color: var(--accent); }
+
+.nav-tally {
+  margin: 10px 16px 0; padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-family: var(--f-mono); font-size: 12px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.nav-tally b { color: var(--accent); font-weight: 600; }
+
+/* ---- content: full width, like Workshop Studio ---- */
+main { padding: 0 40px 64px; }
+
+/* ---- routing: JS adds .routed to <html>. Without it, all pages render
+       stacked in document order and the guide degrades to a scroll. ---- */
+.routed main > .page { display: none; }
+.routed main > .page.active { display: block; }
+.page { padding: 24px 0 24px; }
+
+@media (min-width: 881px) {
+  main { margin-left: var(--sidebar-w); }
+  /* The column is CENTERED in the space beside the sidebar rather than
+     pinned to it: 400px of empty space all on one side reads as a layout
+     fault, while balanced margins read as a measure, which is what it is.
+     Confirmed as the common approach in GitBook, Vercel and Confluence;
+     the alternative is a right-hand "On this page" rail, which was cut on
+     2026-08-18 as duplicating an eleven-entry sidebar. */
+  main > .page { max-width: var(--column); margin-inline: auto; }
+}
+
+@media (max-width: 880px) {
+  #sidebar { display: none; }
+  #topbar-here { display: block; }
+  .brand-name, .topbar-wordmark { display: none; }
+  /* the wordmark is gone, so the divider it carried goes with it */
+  .theme-btn + .topbar-wordmark { border-left: 0; }
+  /* position replaces identity when space is scarce; the mark stays,
+     and stays a tap target back to the contents page */
+  main { padding: 0 16px 48px; }
+  .page { padding: 20px 0 24px; }
+  h1 { font-size: 24px; }
+}
+
+/* ---- print: the guide doubles as the handout. Chrome off, everything
+       expanded, callouts keep their rules. ---- */
+@media print {
+  #topbar, #sidebar, .pager, .copy, .skip { display: none !important; }
+  .routed main > .page { display: block !important; }
+  /* PAPER IS LIGHT WHETHER OR NOT THE READER IS. Without this, printing
+     from dark mode puts Fog-coloured text on white and the page comes out
+     blank. The tokens are reset rather than the components, so every rule
+     downstream follows without a print-specific copy of itself. */
+  :root {
+    --bg: #ffffff; --ink: #00053b; --muted: #707391; --line: #eaeaea;
+    --accent: #844896; --accent-soft: #f5f0f7;
+    --yes: #30881c; --yes-tint: #f3faf1;
+    --no: #db2961;  --no-tint: #fdf2f5;
+    --clock: #707391; --clock-tint: #f7f7f7;
+    --code-bg: #f6f6f6; --code-border: #eaeaea;
+  }
+  body { background: #ffffff; }
+  main { margin: 0; padding: 0; }
+  .page { break-after: page; }
+  .cmd { border: 1px solid #999999; }
+  /* A folded aside prints CLOSED, so the ROOM build was printing with its
+     explanations missing: the whole reason they are folded is that a human
+     is delivering them, and paper has no human. On paper everything is
+     open. Same for the reveal. */
+  details > *:not(summary) { display: block !important; }
+  details > summary { list-style: none; font-weight: 700; }
+  details > summary::after { content: ""; }
+  /* Never split a command from the box that says what it should print. */
+  .step, .diag, .cmd { break-inside: avoid; }
+}
+
+/* ---- GRADIENT AURA, Overview only.
+   The brand primer: "Soft gradient shapes combine to create a dynamic aura,
+   symbolizing the abstract environment in which data lives ... used as a
+   background element where visual interest is needed."
+
+   Every example in the primer is on a dark ground, so the masthead extends
+   the Midnight topbar rather than dropping a dark band into a light page --
+   which would read as a copy-paste accident. Below it the page is white as
+   before. Pure CSS radial gradients in the three primary hues, so it costs
+   nothing offline. ---- */
+/* ONE GRADIENT, TWO ELEMENTS, ONE ORIGIN.
+   The aura used to be a full-bleed pseudo-element on the page: width 100vw,
+   left 50%, translateX(-50%). That trick centers on the CONTAINING BLOCK,
+   and the containing block is the centered page column, which the 300px
+   sidebar pushes 150px off viewport center. So the hero sampled a slice of
+   the gradient 150px away from the slice the topbar sampled, and the two
+   disagreed across the seam.
+
+   The fix is to give both the same origin: THE VIEWPORT. The topbar's box
+   already starts at viewport x=0. main's border box starts at the sidebar
+   width, so shifting its background left by exactly that amount, and up by
+   the topbar's height, lands the gradient's 0,0 at the viewport's 0,0. Both
+   now read from one image at one position, so there is nothing to align. */
+.at-overview main {
+  background: var(--aura);
+  background-origin: border-box;
+  background-size: 100vw var(--aura-h);
+  background-position: calc(-1 * var(--sidebar-w)) calc(-1 * var(--topbar-h));
+  background-repeat: no-repeat;
+}
+@media (max-width: 880px) {
+  /* the sidebar is hidden here, so main already starts at viewport x=0 */
+  .at-overview main { background-position: 0 calc(-1 * var(--topbar-h)); }
+}
+#page-overview {
+  padding-top: 0;          /* flush to the topbar: they are one surface */
+}
+/* ---- the masthead: title left, terminal transcript right. Dropbox's
+       developer guides use exactly this shape, and Grammarly floats a code
+       card in its hero. The right-hand 40% used to be empty. ---- */
+/* THE MASTHEAD OWNS THE AURA'S HEIGHT, not the page. This min-height used to
+   sit on #page-overview, which made the SECTION fill the aura while the
+   masthead inside it stayed short -- so the next heading flowed up into the
+   dark and rendered navy-on-navy. Put on .mast, it guarantees the masthead
+   reaches the bottom of the gradient, so body content always starts below it. */
+/* CENTRED, NOT TOP-ALIGNED. The two columns are different heights by
+   design -- a title and three lines of standfirst against an eight-row
+   transcript -- and starting both at the top left a hole under the text
+   that read as unfinished rather than as space. */
+.mast {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 27rem);
+  gap: 40px; align-items: center; padding: 76px 0 88px;
+  min-height: calc(var(--aura-h) - var(--topbar-h));
+  box-sizing: border-box;
+}
+#page-overview .page-head { padding-top: 0; border-bottom: 0;
+  margin-bottom: 12px; }
+/* The Overview title takes its SIZE from base.css like every other h1 and
+   overrides only what the dark masthead needs, which is the color. An
+   Overview-specific size is what put a 747px title into a 488px column. */
+#page-overview .page-head h1 { color: var(--on-dark); }
+#page-overview .standfirst { color: var(--topbar-fg); }
+#page-overview .standfirst strong { color: var(--on-dark); }
+#page-overview .mast-meta { color: var(--topbar-dim); }
+#page-overview .mast-meta strong { color: var(--topbar-name); }
+
+/* the transcript. A card, not a screenshot: it is real text, so it stays
+   selectable, searchable and legible at any zoom. */
+.hero-card {
+  display: flex; flex-direction: column;
+  font-family: var(--f-mono); font-size: 13px; line-height: 1.7;
+  background: rgba(0, 5, 59, 0.42);
+  border: 1px solid rgba(226, 227, 241, 0.18);
+  border-radius: var(--radius-md);
+  padding: 16px 18px; color: var(--topbar-fg);
+  backdrop-filter: blur(2px);
+  font-variant-numeric: tabular-nums;
+}
+.hero-cmd { color: var(--on-dark); white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; }
+.hero-cmd i { color: var(--topbar-name); font-style: normal;
+  margin-right: 8px; }
+.hero-out { color: var(--topbar-fg); opacity: 0.86; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; }
+.hero-gap { height: 10px; }
+.hero-card .v-yes { color: var(--on-dark-yes); }
+.hero-card .v-no  { color: var(--on-dark-no); }
+
+/* THE MASTHEAD SPLITS ONLY WHEN BOTH HALVES CAN HAVE THEIR FULL MEASURE.
+   The split gives the title `column - 27rem card - 40px gap`. The column is
+   min(60rem, viewport - 380), so that left half is 488px only while the
+   column is at its full 60rem, which needs a viewport of 1340px or more.
+   Below that the left half shrinks fast -- 428px at 1280, 249px at 1120 --
+   while the 44px title still needs 461px, so it wrapped to two lines on a
+   1280x800 laptop and THREE at 1120. The old breakpoint was 1100px, which
+   left a 240px band of very common widths broken.
+
+   One column below 1340 gives the title min(60rem, viewport - 380), which is
+   932px at 1340 and 501px at 881: it fits with room the whole way down. */
+@media (max-width: 1340px) {
+  /* Stacked, the card goes FULL WIDTH and stops being a cramped sidebar: it
+     becomes the centred code window Antimetal and Height both use, and
+     nothing in it truncates. Worth keeping -- a 1280px laptop is a likely
+     reader, and the star moment is why the masthead exists.
+     Less air than the wide layout. 76px of a wide fold is generous; 76px of
+     a smaller one is a third of it. */
+  .mast { grid-template-columns: minmax(0, 1fr); gap: 24px;
+          padding: 56px 0 64px; }
+  /* THE AURA HAS TO COVER THE MASTHEAD IT SITS BEHIND. Stacked, the masthead
+     is 471-557px tall depending on how the standfirst wraps, against a 384px
+     aura -- so the transcript card ran off the bottom of the gradient onto
+     white, and its fill is rgba(0,5,59,0.42), which over white is grey. It
+     looked like a rendering fault. Measured card bottoms: 499 at 1340, 556
+     at 900, 561 at 390. 600 clears all of them.
+     This was already wrong below 1100px before the breakpoint moved; the
+     breakpoint change only made it easy to see.
+     LEFT AT 600 ON PURPOSE, TWICE. First after the 2026-08-26 masthead
+     cut, where the card lost only ~66px and an estimate put the stack
+     anywhere between 500 and 610. Then again when the masthead gained its
+     top and bottom air: recomputed at 56/64 padding the stack needs ~575, so
+     the measured number was right on both occasions and cutting it would
+     have been wrong on both.
+     Too tall is a little wasted colour. Too short puts the card's
+     rgba(0,5,59,0.42) fill over white, which renders grey and reads as a
+     fault. Change this only with a real narrow-viewport measurement. */
+  :root { --aura-h: 600px; }
+}
+
+/* ---- PHONES. The card cannot be shown honestly here. ----
+   .hero-cmd and .hero-out are `white-space: nowrap; text-overflow: ellipsis`,
+   so below roughly 400px of measure the longest line clips to
+   `$ op threatscan infra/wo…`. A truncated star moment is worse than no star
+   moment: it reads as a broken page rather than as an argument. The masthead
+   keeps the title and the standfirst, which say the same thing in prose, and
+   the transcript returns the moment there is room for all of it.
+
+   With the card gone the stack is title + standfirst + padding, so the band
+   comes down from 600. This is the ONLY narrow width where shrinking it is
+   safe, because the tall thing it had to clear is no longer rendered.
+
+   460, MEASURED, not estimated. The standfirst reflows hard at the bottom of
+   this range: the masthead is 336px at 390 but 411 at 360 and 440 at 320, and
+   380 -- which is what I set first -- left the last lines of the standfirst
+   below the gradient. Light text on white is invisible, which is a worse
+   failure than the grey card it replaced.
+
+   The 44px title needs 461px to sit on one line. At 32px it needs ~335 and
+   wraps to two, which is a masthead; at 44px it wraps to three, which is a
+   wall. */
+@media (max-width: 640px) {
+  :root { --aura-h: 460px; }
+  .hero-card { display: none; }
+  #page-overview .page-head h1 { font-size: 32px; letter-spacing: -0.018em; }
+}
+
+/* On paper there is no aura, so the masthead's white text needs ink. */
+@media print {
+  .at-overview main, #topbar { background: none !important; }
+  #page-overview { min-height: 0; }
+  #page-overview .page-head h1,
+  #page-overview .standfirst,
+  #page-overview .standfirst strong { color: #000 !important; }
+  #page-overview .mast-meta, #page-overview .mast-meta strong {
+    color: #333 !important;
+  }
+  .hero-card { display: none; }
+}

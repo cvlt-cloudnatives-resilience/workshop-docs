@@ -1,0 +1,8 @@
+# Built output. The site is built in CI on every push, so a committed copy
+# could only ever be a second answer to the same question.
+_site/
+
+__pycache__/
+*.py[cod]
+
+.DS_Store

@@ -1,0 +1,142 @@
+/* The landing page: one card per workshop folder.
+
+   Does not load layout.css -- it has none of that furniture. What it shares
+   is the aura masthead, so the index and a guide read as one site. Every
+   color comes from tokens.css. */
+
+body.index { --index-w: 64rem; }   /* cards, not prose, so not --column */
+
+/* ---- masthead ---- */
+
+/* Sampled exactly as a guide's Overview does: 100vw, so the gradient's
+   geometry does not depend on this page's content width. */
+.index-mast {
+  background: var(--aura);
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: 100vw var(--aura-h);
+  color: var(--on-dark);
+  padding: 56px 32px 64px;
+}
+/* One wrapper, not max-width on each child: centering children individually
+   drifts the wordmark and the standfirst off the left edge. */
+.index-mast-inner { max-width: var(--index-w); margin-inline: auto; }
+
+/* Mark left, theme control right, as the guide's topbar has it. */
+.index-brandrow {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 40px;
+}
+.index-wordmark { display: block; height: 22px; width: auto; }
+
+/* Restated, not shared: layout.css owns .theme-btn and is not loaded here.
+   Same 30px target, same on-Midnight colors. */
+.index-theme {
+  margin-left: auto;
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0; flex: none;
+  background: transparent; color: var(--topbar-fg);
+  border: 0; border-radius: var(--radius-md); cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.index-theme:hover { background: rgba(255, 255, 255, 0.12);
+  color: var(--on-dark); }
+.index-theme:focus-visible { outline: 2px solid var(--topbar-name);
+  outline-offset: 2px; }
+/* One icon at a time, naming the destination. */
+.index-theme .i-moon { display: block; }
+.index-theme .i-sun  { display: none; }
+:root[data-theme="dark"] .index-theme .i-moon { display: none; }
+:root[data-theme="dark"] .index-theme .i-sun  { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .index-theme .i-moon { display: none; }
+  :root:not([data-theme="light"]) .index-theme .i-sun  { display: block; }
+}
+
+/* The kicker is crocus everywhere else in the system; on Midnight it is the
+   crocus tint that holds contrast there, which is the topbar's own value. */
+.index-mast .kicker {
+  color: var(--topbar-name);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.index-mast h1 { color: var(--on-dark); }
+.index-standfirst {
+  font-size: 19px; line-height: 30px; letter-spacing: -0.005em;
+  color: var(--topbar-fg);
+  max-width: 42rem; margin-top: 14px;
+}
+
+/* ---- the list ---- */
+
+/* +64px so the padding box, not the content box, is --index-w: otherwise
+   the cards start 32px inboard of the title above them. */
+.index-main {
+  max-width: calc(var(--index-w) + 64px);
+  margin: 0 auto; padding: 48px 32px;
+}
+
+.index-list { list-style: none; display: grid; gap: 16px; }
+@media (min-width: 880px) {
+  .index-list { grid-template-columns: repeat(2, 1fr); }
+}
+
+.index-card a {
+  position: relative;
+  display: grid; gap: 8px; height: 100%;
+  padding: 24px 56px 24px 26px;   /* right gutter is the chevron's */
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: inherit; text-decoration: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease,
+              transform 160ms ease;
+}
+.index-card a:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .index-card a, .index-card a::after { transition: none; }
+  .index-card a:hover { transform: none; }
+}
+
+.index-card-title { font-size: 22px; font-weight: 700;
+  letter-spacing: -0.011em; line-height: 1.2; }
+/* Borders rather than a glyph, so a screen reader is not told "right arrow"
+   after every title. Absolute, or it claims a grid row and reads as content. */
+.index-card a::after {
+  content: "";
+  position: absolute; top: 30px; right: 26px;
+  width: 9px; height: 9px;
+  border-right: 2px solid var(--accent);
+  border-top: 2px solid var(--accent);
+  transform: rotate(45deg);
+  transition: transform 160ms ease;
+}
+.index-card a:hover::after { transform: rotate(45deg) translate(3px, -3px); }
+.index-card-blurb { color: var(--muted); }
+.index-card-meta {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---- foot ---- */
+
+.index-foot {
+  max-width: calc(var(--index-w) + 64px); margin: 0 auto;
+  padding: 0 32px 64px;
+  color: var(--muted); font-size: 14px;
+}
+.index-foot p { border-top: 1px solid var(--line); padding-top: 20px; }
+
+/* Same breakpoints as a guide page's masthead. */
+@media (max-width: 880px) {
+  :root { --aura-h: 600px; }
+  .index-mast { padding: 40px 20px 48px; }
+  .index-main, .index-foot { padding-inline: 20px; }
+}
+@media (max-width: 480px) {
+  :root { --aura-h: 460px; }
+}
