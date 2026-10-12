@@ -199,6 +199,44 @@ which op resops
  ✗ IF NOT           setup had not finished when this terminal opened. Run bash .devcontainer/postCreate.sh, then open a new terminal. In a room, ask now rather than when the first command runs.
 ```
 
+### Create your .env
+
+Rename `.env.example` to `.env`.
+
+```bash
+mv .env.example .env
+```
+
+```
+ ✓ YOU SHOULD SEE   nothing.
+```
+
+Open `.env`, copy your five credentials into it from the credentials file
+your facilitator gave you, and save it.
+
+### Fill in workshop.yaml
+
+Open `config/workshop.yaml`. Under `workload`, fill in the three fields
+marked FILL with the values from your credentials file, then save the file.
+
+```list
+ name               your codename
+ resource_group     your resource group
+ attestation_file   your attestation path, which ends in your codename
+```
+
+### Load your credentials
+
+Once your files are filled in, load `.env` into your terminal.
+
+```bash
+source .env
+```
+
+```
+ ✓ YOU SHOULD SEE   nothing.
+```
+
 ### Sign in, and check what you filled in
 
 Terraform reads `ARM_*` from `.env` by itself. The `az` CLI does not, and
