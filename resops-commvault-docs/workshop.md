@@ -125,11 +125,13 @@ This page works with the network off. In a facilitated session the lab is
 provisioned, drilled and retired for you, and you arrive with your workload
 already at `VALIDATED`.
 
-**The expected results for the offline commands were checked by running
-them. The ones for the live commands are written from the code and have not
-yet been watched against a real tenant.** If your screen does not match a
-box, the box tells you what to do about it. If it still does not match, tell
-your facilitator: the box may be the thing that is wrong.
+**The expected results on this page come from running the commands: the
+offline ones on this repository, the live ones in a run against a real Azure
+subscription and Commvault Cloud tenant in September 2026.** A few messages
+were reworded after that run and are quoted from the code. Job ids, times and
+names will differ on your screen. If anything else does not match a box, the box tells you
+what to do about it. If it still does not match, tell your facilitator: the box
+may be the thing that is wrong.
 
 ## Setup
 
@@ -298,7 +300,7 @@ op validate infra/workloads
                     PASS  az logged in, correct subscription
                     validate PASS — safe to climb and teardown
  ✓ THIS IS EXPECTED  IAM reports skipped. Your credential cannot read at subscription level, so the check cannot run. Skipped is not a failure, and there is nothing to fix.
- ⏱ HOW LONG         about twenty seconds
+ ⏱ HOW LONG         about ten seconds
  ✗ IF NOT           the FAIL line names the field. `has N unfilled field(s)` lists every one it found by name: you have not finished `config/workshop.yaml`. `az not logged in` means the login above did not take, usually a secret pasted without its quotes.
 ```
 
@@ -381,27 +383,40 @@ which are about the terminal, not the lab.
                                different directory. Run it from the repository
                                root.
  not in /VM                    Discovery has not run. It is the one manual
-                               step in this workshop: Command Center,
-                               Protect, Virtualization, your hypervisor,
-                               Discover.
+                               step in this workshop: Command Center, Protect,
+                               Azure, Protection groups, then Discover from
+                               the row's menu.
  no vmgroup for                `op protect` has not run for this workload yet.
  could not run the command     The VM is not running, or its guest agent is
                                not ready. The agent needs about two minutes
                                after boot. Retry once before investigating.
- Waiting                       The job is queued for a media agent, the shared
-                               worker that moves the data. About two minutes
-                               is normal and up to 27 has been seen.
-                               Do not kill it.
+ Waiting                       The job is queued for a media agent, the
+                               worker that moves backup data. Usually a few
+                               minutes, occasionally much longer. Do not stop
+                               the command.
+ No suitable access node       A threat scan found no free scanning worker.
+                               Nothing is wrong with your workload: run the
+                               scan once more. If it fails the same way, the
+                               scanning service needs an administrator.
+ Commvault token is dead       The token pair in `.env` has expired. Create a
+                               new pair in Command Center (your avatar, then
+                               Access Tokens, then Add) and paste both values
+                               into `.env`.
  threatscan trigger refused    The scan plan id is missing or wrong. Set
                                `scan_plan_id` in `config/workshop.yaml`.
- climb stops at the drill      The drill did not pass, which is the drill
+ climb stops at the restore    The drill did not pass, which is the drill
                                doing its job. Read the `FAIL:` line: it names
                                what it found inside the restored copy.
  no run to publish             `op gate` has not run yet. `metrics` publishes
                                the last run rather than taking its own.
- attestation stale             Something backed up after your last drill, so
+ does not cover the newest     Something backed up after your last drill, so
                                the proof no longer covers the newest recovery
-                               point. Run the drill again.
+                               point. Run the drill again. A scheduled backup
+                               can cause this with nobody running anything.
+ older recovery point dirty    The last drill found an earlier recovery point
+                               dirty, and nothing has checked the newest one.
+                               Run the drill: it shows whether the repair
+                               reached the backup.
 ```
 
 **Before investigating anything, run these three.** All are read-only.
@@ -420,7 +435,7 @@ Write these down now and set them aside; how they read to you afterward is
 the measure of the workshop.
 
 Very few organizations can answer the first question with confidence. That
-is the industry's position today, not a judgement on any one team, and it is
+is the industry's position today, not a judgment on any one team, and it is
 the reason this workshop exists. An honest low number is worth more here
 than a confident one.
 
@@ -530,14 +545,14 @@ terraform -chdir=infra/workloads apply -auto-approve
                     workload = {
                       "location" = "eastus2"
                       "resource_group" = "rg-lab-<your-handle>"
-                      "restore_storage_account" = "st<...>"
+                      "restore_storage_account" = "<yourcodename>rst<...>"
                       "subnet_id" = "/subscriptions/<...>"
                       "vm_guid" = "<...>"
                       "vm_name" = "<your-codename>"
                       "vm_size" = "Standard_F1als_v7"
-                      "vnet_name" = "vnet-<your-codename>"
+                      "vnet_name" = "resops-<your-codename>-vnet"
                     }
- ⏱ HOW LONG         two to four minutes
+ ⏱ HOW LONG         about two minutes
  ✗ IF NOT           read the first error line and nothing else. Quota and an expired login are the usual causes: run az account show, then retry once. If it asks you to run terraform init, run `terraform -chdir=infra/workloads init -input=false` once, then apply again.
 ```
 
@@ -562,41 +577,43 @@ up the console may refuse you too. If it does, your facilitator runs it once
 for the room.
 
 ```do
-1. Sign in to Command Center and open **Protect**, then **Virtualization**,
-   then your Azure connection. Its name is in your session instructions,
-   or in your own config as `platform.hypervisor.name`.
-2. Click **Start discovery**.
+1. Sign in to Command Center and open **Protect**, then **Azure**.
+2. Open the **Protection groups** tab. On the workshop's group, open the
+   row's menu (⋮) and choose **Discover**. The group's name is in your
+   session instructions.
 3. Wait for **Last update**, at the top of the page, to change to the
    current time with a green check beside it.
-4. Open the **Resources** tab and filter by your connection.
+4. Open the **Resources** tab on the same Azure page.
 ```
 
 ```
- ✓ YOU SHOULD SEE   three resources, and your VM among them
-                    <your-codename>   Azure VM   30 GB   Not protected
+ ✓ YOU SHOULD SEE   your VM listed, with the storage account your apply created beside it
+                    <your-codename>              Azure VM                 eastus2
+                    <yourcodename>rst<...>       Azure storage account    eastus2
+                    <yourcodename>rst<...>       Azure Table storage      eastus2
  ⏱ HOW LONG         about two minutes. The page does not refresh itself, so
                     `Last update` is what tells you the job finished.
  ✗ IF NOT           if your VM is missing, discovery ran before your
-                    `terraform apply` finished. Click **Start discovery** again.
-                    If the button is greyed out, or the page returns an error,
-                    your account is read-only on this connection: ask your
-                    facilitator to run discovery, then re-check the Resources
-                    tab. Nothing else in the workshop needs this permission.
+                    `terraform apply` finished. Run **Discover** again.
+                    If the menu item is unavailable, or the page returns an
+                    error, your account cannot run discovery on this
+                    connection: ask your facilitator to run it, then re-check
+                    the Resources tab. Nothing else in the workshop needs
+                    this permission.
 ```
 
 ```
- ? HOW IT WORKS: THREE RESOURCES, AND WHY NONE IS PROTECTED
-   Your `terraform apply` created a VM, a storage account used for restore
-   staging, and the table storage inside it. Discovery lists all three
-   because all three are Azure resources in the subscription. Only the VM is
-   your workload.
+ ? HOW IT WORKS: WHAT DISCOVERY FOUND
+   Your `terraform apply` created a VM and a storage account used for
+   restore staging, and the console lists the account's table storage as
+   a resource of its own. Discovery lists every one of them because each
+   is an Azure resource in the subscription. Only the VM is your workload.
 
-   All three read Not protected, which is correct here. Discovery makes a
-   resource visible to the platform. Protection is a separate decision, and
-   it is what `op protect` does later in this chapter.
+   Discovery makes a resource visible to the platform. Protecting it is a
+   separate step, and it is what `op protect` does later in this chapter.
 
-   That Resources tab is the same view `op preflight` reads. The next command
-   asks the API the question you just answered by eye.
+   The Resources tab is the same inventory `op preflight` reads. The next
+   command asks the API the question you just answered by eye.
 ```
 
 ```bash
@@ -620,7 +637,7 @@ op protect infra/workloads
  ✓ YOU SHOULD SEE   a VM group created, with your VM's id attached to it. The number is the group's id, and it is what every later command addresses. A VM group is what Commvault Cloud protects: a named set of machines with one protection plan applied to all of them.
                     protected: group 12345  (<your-codename> by <vm-guid>,
                     IntelliSnap off)
- ✗ IF NOT           a failure naming discovery means the platform cannot see your VM yet: click Start discovery in Command Center again, wait for Last update to change, then re-run this.
+ ✗ IF NOT           a failure naming discovery means the platform cannot see your VM yet: run **Discover** again in Command Center, wait for Last update to change, then re-run this.
 ```
 
 ```bash
@@ -632,7 +649,7 @@ op backup infra/workloads
                     backup job 8210418 on group 12345…
                     backup Completed
  ⏱ HOW LONG         about two minutes
- ✗ IF NOT           if it sits on "Waiting", it is queued for a media agent: the shared worker that moves the data. Waiting for one is normal and not a failure. DO NOT KILL IT.
+ ✗ IF NOT           if it sits on "Waiting", it is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command.
 ```
 
 ```
@@ -650,13 +667,52 @@ op backup infra/workloads
    reaches back.
 
    Immutable means retention-locked: for the retention window, the
-   copies cannot be altered or deleted by anyone. Ransomware's first
-   professional move is destroying backups before revealing itself.
+   copies cannot be altered or deleted by anyone. Ransomware commonly
+   tries to delete backups before revealing itself.
    This is the control that makes that move fail.
 
    The pool keeps every recovery point, including this one. Choosing
    which point to trust is what the rest of this workshop covers.
 ```
+
+### Check it for threats
+
+Before restoring from a recovery point, have the platform read it. Threat
+Scan opens the copy in the recovery plane and looks for malware there, without
+touching the VM.
+
+```bash
+op threatscan infra/workloads
+```
+
+```
+ ✓ YOU SHOULD SEE   a scan job, its progress, and a verdict. On a clean workload the verdict says nothing was found, and says what that does not prove.
+                    threatscan job <n>  (client <n>, scan plan <n>)...
+                    threatscan attempt Completed
+                    verdict: no threats found. A scan cannot prove a recovery
+                    point is clean; the restore drill checks that.
+ ⏱ HOW LONG         about three minutes, sometimes up to nine. The job waits
+                    for a scanning worker first; the progress line keeps
+                    moving while it does.
+ ✗ IF NOT           `Commvault: No suitable access node found` means no scanning worker was free. Run the scan once more. If it stops and asks for scan_plan_id, set it in config/workshop.yaml and run it again.
+```
+
+```
+ ? WHY SCAN BEFORE THE DRILL
+   The two checks answer different questions. The scan asks whether the
+   platform can see anything bad in the recovery point. The drill asks
+   whether the point restores and whether the data inside is intact.
+
+   The scan goes first so that a point already flagged is never restored.
+   It cannot go last, because "nothing found" is not proof of clean: a
+   scan reports what it matched, and silence is not a verdict. Only the
+   drill opens the copy and checks it from the inside.
+```
+
+These four steps (backup, scan, drill, gate) are the loop the rest of this
+workshop repeats. You will run it three times: now, on a clean workload, with
+the gate at the start of Chapter 2; in Chapter 3, on a compromised one; and in
+Chapter 5, after the repair.
 
 ### Prove it restores
 
@@ -674,15 +730,15 @@ op restore infra/workloads
                       job status : Completed
                       azure VM   : PASS — exists & running
                       attestation: PASS — attested clean
-                                   OK: code intact, baseline present,
+                                   code intact, baseline present,
                                    3 customer records, no encryption
                                    markers, write/read verified
                                    → evidence/attestations/<your-codename>.json
  ✓ THEN IT WAITS    the drill stops and asks you to press Enter before it deletes the restored copy. It is not stuck. The copy is up in Azure right now, and this is the only moment it exists.
-                    ✓ RECOVERED: <your-codename>-restored is running in
+                    ✓ RECOVERED: <your-codename>-restore is running in
                       Azure (RG rg-lab-<your-handle>).
                     Press Enter to tear it down…
- ⏱ HOW LONG         about five minutes to the verdict, then it waits for you. The teardown after Enter is another minute.
+ ⏱ HOW LONG         about three minutes to the verdict, then it waits for you. The teardown after Enter is about a minute.
  ✗ IF NOT           a guest-agent-not-ready failure on a fresh restore is transient: run it again. Any FAIL: line is the attester doing its job, so read it before you retry.
 ```
 
@@ -782,7 +838,7 @@ Every line of that output pairs a recovery fact with a practice you already
 run:
 
 ```list
- discover    Service discovery. Is the workload known to the platform?
+ discover    Service discovery. Is the workload onboarded into a VM group?
  protect     GitOps drift detection. Does declared coverage match actual?
  detect      A health check. Did the last backup complete cleanly?
  recover     Rollback readiness. Is the recovery point recent enough?
@@ -797,9 +853,9 @@ there is one for having cleared none:
  UNDISCOVERED ─▸ DISCOVERED ─▸ PROTECTED ─▸ MONITORED ─▸ RECOVERABLE ─▸ TRUSTED ─▸ VALIDATED
       0              1             2            3             4            5           6
       │              │             │            │             │            │           │
-   nothing        the         a plan is    backups are    a recent     something    a drill
-   knows it     platform      attached      completing    enough copy   scanned      restored
-    exists      sees it                                     exists      the copy    and read it
+   nothing         in a        a plan is   backups are    a recent      a drill   the restore
+  knows it       VM group      attached    completing    enough copy   found it     job is
+   exists                                                  exists        clean     confirmed
 ```
 
 You will see your own workload at VALIDATED and stay there. The estate in
@@ -825,7 +881,23 @@ op gate infra/workloads
                     = held at VALIDATED over 3 runs
 
                     PROMOTE  exit 0
- ✗ IF NOT           if it says HOLD and names coverage, a backup ran after your last drill. Run the drill again and re-gate, or keep reading: you meet that exact behavior on purpose in the next chapter.
+ ✗ IF NOT           if it says HOLD and names coverage, a backup ran after your last drill, possibly a scheduled one (see below). Run the drill again and re-gate, or keep reading: you meet that exact behavior on purpose in the next chapter.
+```
+
+```
+ ? HOW IT WORKS: A BACKUP NOBODY RAN
+   Protection plans usually back up on a schedule as well as on demand,
+   and can scan the new point at the same time. Your facilitator knows
+   whether the plan used today has one.
+
+   A scheduled backup creates a recovery point that nothing has
+   restored and checked. If one runs during your session, your
+   workload drops from VALIDATED to RECOVERABLE with nobody typing
+   anything, and the gate says HOLD. That is correct: the proof was
+   about an older point. A drill on the new point restores the verdict.
+
+   In production this is the normal case, and it is why the check runs
+   on a schedule as well as on every change.
 ```
 
 Three lines in that output appear on every run from here, so they are worth
@@ -929,8 +1001,8 @@ mount passes the first four and fails a real service on its first write.
 ```
  STAGE      Scan. It falls, and it falls from a backup job that said
             Completed.
- EXERCISE   Compromise the workload you built, then watch two controls
-            catch it two different ways
+ EXERCISE   Compromise the workload you built, run the loop again, and
+            watch two controls catch it two different ways
  LEARN      Why proof does not accumulate, and where a verdict can
             honestly come from
  RULE       Green is a job status, not a verdict about your data.
@@ -939,8 +1011,8 @@ mount passes the first four and fails a real service on its first write.
             You are finding out whether anything ever has.
  DONE WHEN  `op gate infra/workloads` says HOLD and exits 1. HOLD is the
             correct answer in this chapter. If you got PROMOTE the
-            incident did not land: run `op incident`, then `op backup`,
-            then gate again.
+            incident did not land: run `op incident`, then the loop again
+            (`op backup`, `op threatscan`, `op restore`, `op gate`).
 ```
 
 You have a proven workload and a gate that says yes. The next step breaks
@@ -953,7 +1025,7 @@ This chapter turns on one question:
 ```
 
 You proved this workload recovers. That proof was about one moment, and
-there will be a newer recovery point within the hour. Answer for yourself
+there will be a newer recovery point with the next backup, scheduled or not. Answer for yourself
 first; the tools give their answer in the next chapter.
 
 ### Write it down before we break it
@@ -988,6 +1060,9 @@ op incident infra/workloads
                       inert, no real encryption
                     planted: 2 EICAR files, 14 .locked files, 1 note
                     BASELINE marker still present: yes
+
+                    Compromise planted. The ladder cannot see it until a
+                    backup captures it.
  ✓ THIS IS EXPECTED  this command plants a compromise on purpose. The files are inert test patterns, not malware. Do not clean them up: the next steps depend on them.
  ⏱ HOW LONG         up to a couple of minutes, with no output until it is
                     done. The VM has no inbound access, so this runs through
@@ -1003,6 +1078,9 @@ that detection can be tested without handling anything dangerous. The
 Nothing here encrypts or damages anything, so the detection is real while the
 damage is not.
 
+Now run the loop from Chapter 1 against the compromised workload: backup,
+scan, drill, gate.
+
 ### Commit it into a recovery point
 
 ```bash
@@ -1011,28 +1089,26 @@ op backup infra/workloads
 
 ```
  ✓ YOU SHOULD SEE   the same clean, green result you got the first time, under a new job id
-                    backup job 8210692 on group 12345…
+                    backup job <n> on group <n>…
                     backup Completed
  ✓ THIS IS EXPECTED  the band on the wall falls two rungs even though the backup succeeded. That drop is the point of this step, not an error.
  ✓ ON THE WALL      your band steps down two rungs, from VALIDATED to RECOVERABLE. A job that succeeded moved you backwards, because it made a recovery point nothing has verified.
  ⏱ HOW LONG         about two minutes
- ✗ IF NOT           if it sits on "Waiting", it is queued for a media agent: the shared worker that moves the data. Waiting for one is normal and not a failure. DO NOT KILL IT.
+ ✗ IF NOT           if it sits on "Waiting", it is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command.
 ```
 
-Stop on that for a moment, because it is the whole argument in one frame. A
-green job and a falling band, side by side, at the same instant. The job is
-reporting that it ran. The band is reporting whether you can prove recovery,
-and running is not proving.
+A green job and a falling band, side by side. The job reports that it ran.
+The band reports whether you can prove recovery, and running is not proving.
 
 Widen the time range on the wall and every flat band in that estate reads the
-same way: work happened there, and nothing got better. That is what a backup
-dashboard cannot tell you and this one can.
+same way: work happened there, and nothing got better. A backup dashboard
+cannot show that; this one can.
 
 ```
  ? WHAT YOU ARE WATCHING
    Your own planted compromise being committed into a recovery point.
-   The job says Completed. It is green. It is correct. Nothing is
-   broken, which is exactly what makes it dangerous.
+   The job says Completed, and it is correct: the backup worked.
+   Nothing reports a problem, which is why this is easy to miss.
 
    The recovery point lands in air-gapped, immutable storage; nothing
    on the VM, including your compromise, can reach it.
@@ -1045,61 +1121,63 @@ dashboard cannot tell you and this one can.
    after it. Keep that in mind for the next command.
 ```
 
-### The gate answers twice
+### Proof does not carry over
+
+Ask the ladder why it fell. This only reads; it changes nothing.
 
 ```bash
-op gate infra/workloads
+op status infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the ladder two rungs lower, stopped at Scan, and the verdict beneath it reversed. The reason is on the Scan line.
+ ✓ YOU SHOULD SEE   the ladder two rungs lower, stopped at Scan, with the reason on the Scan line
                     ●●●●✗·  RECOVERABLE  ·  RPO 0.1h
-                    ✗ Scan      attestation does not cover the newest recovery point — verified <n> min before it was taken; re-run the drill
-
-                    HOLD  exit 1
- ✓ THIS IS EXPECTED  a ✗ on the Scan line, HOLD, and exit 1. This is the correct verdict for a recovery point nobody has verified. Do not re-run the drill to fix it; the next steps explain why.
+                    ✗ Scan      attestation does not cover the newest recovery
+                                point — verified <n> min before it was taken;
+                                re-run the drill
+ ✓ THIS IS EXPECTED  a ✗ on the Scan line. This is the correct reading for a recovery point nobody has verified. Do not re-run the drill to fix it; the next steps explain why.
 ```
 
 ![The attestation covers recovery point 1, and nothing after it.](images/proof-timeline.svg)
 
-The ladder has fallen from VALIDATED to RECOVERABLE and the gate now says
-HOLD. Nothing on the machine changed that the ladder can see. The Scan rung
-means a verified-clean restore covers the newest recovery point, and your
-backup just made a newer point that nothing has opened.
+Nothing on the machine changed that the ladder can see. The Scan rung needs a
+verified-clean restore of the newest recovery point, and your backup made a
+newer point that nothing has opened. The footer names the drill, the step that
+would settle it; the loop scans first, so a point already flagged is never
+restored.
 
 ```
  ? WHY THIS MATTERS
-
-   You did not change the verdict. You took a BACKUP.
+   You did not change the verdict. You took a backup.
 
    An attestation is a claim about ONE recovery point, not a property
    of the workload. There is now a newer point and nothing has opened
-   it, so the proof you had 10 minutes ago vouches for nothing. Most
-   people expect proof to accumulate. It does not.
+   it, so the proof from Chapter 1 does not cover it. Proof does not
+   accumulate.
 
    The distance between what an organization believes it can recover
    and what it can prove is the RESILIENCE GAP. This workload's gap
    just appeared in one line.
 ```
 
-Now run the threat lane against the same recovery point:
+### Scan it
 
 ```bash
 op threatscan infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   a scan that ran, the verdict with what it found, and then the command exiting non-zero on it. Two lines, because the first is the finding and the second is the consequence.
-                    verdict: THREATS FOUND - <what the scan matched>
-                    THREATS DETECTED — the scan ran and this recovery
-                    point is NOT safe to restore from. The scan did its
-                    job; the backup is the problem.
+ ✓ YOU SHOULD SEE   the verdict with what the scan found, then what it means for the recovery point. The command exits 1: a pipeline reading it stops here.
+                    verdict: THREATS FOUND - 2 malware item(s) found in the
+                    recovery point
+                    THREATS DETECTED: malware was found in this recovery
+                    point. Do not restore from it. Repair the source, then
+                    take a new backup.
  ✓ THIS IS EXPECTED  THREATS FOUND and a non-zero exit. The scan found the compromise you planted, which is what it is for. Nothing is broken.
- ⏱ HOW LONG         about three minutes, and up to six. The job id prints
-                    straight away, then the client polls every 20
-                    seconds until the scan finishes. Silence in between is
-                    the poll interval, not a hang.
- ✗ IF NOT           if it stops and asks for scan_plan_id, set it in config/workshop.yaml and run it again. The first lesson above has already landed either way.
+ ⏱ HOW LONG         about three minutes, sometimes up to nine. The job waits
+                    for a scanning worker first; the progress line keeps
+                    moving while it does.
+ ✗ IF NOT           `Commvault: No suitable access node found` means no scanning worker was free: run the scan once more. If it stops and asks for scan_plan_id, set it in config/workshop.yaml and run it again.
 ```
 
 ```
@@ -1150,23 +1228,78 @@ watches threats across the estate.
    tools.
 ```
 
-```
- ? WHY THIS MATTERS
-   Two exit 1s, two different reasons. The first said "nothing has looked
-   at this point". The second said "something looked, and found
-   malware". Those are opposite situations and they must never read the
-   same. A check that examined nothing must never report a pass.
+### Try to restore from it
+
+The scan says the point is unsafe, and its footer says `op remediate`: in a
+real incident you would repair and not restore from this point. Here you run
+the drill once anyway, to see the second control catch the same compromise
+from the inside. Its footer says `op remediate` too; Chapter 4 does that,
+after the gate.
+
+```bash
+op restore infra/workloads
 ```
 
-**Where you are now.** The backup job said Completed, the restore said
-Completed and the VM is healthy. Every signal the platform gave you was green,
-and the recovery point you would have restored from contains the compromise.
+```
+ ✓ YOU SHOULD SEE   the restore complete and the copy boot, then verify.sh inside the copy refuse it. The command exits 3: restored, but not clean.
+                    FAIL: 14 encrypted (.locked) files present
+
+                    === DRILL VERDICT ===
+                      job status : Completed
+                      azure VM   : PASS — exists & running
+                      attestation: FAIL — attestation failed
+                                   14 encrypted (.locked) files present
+                    Restored, NOT clean: <your-codename>-restore is running
+                      in Azure (RG rg-lab-<your-handle>).
+                    Press Enter to tear it down…
+                    ...
+                    RESTORE DRILL DID NOT PASS — the restored copy is not
+                    clean — verify.sh said so inside it.
+ ⏱ HOW LONG         about three minutes to the verdict, then it waits for you.
+ ✗ IF NOT           if the attestation says PASS, the backup ran before the incident finished: run `op incident`, then the loop again.
+```
+
+The restore worked. The machine is up and healthy by every infrastructure
+measure. It is still not a recovery, because the data inside it is the
+compromise. Restored and clean are two different claims, and only a check
+that reads the data can tell them apart.
+
+### The gate
+
+```bash
+op gate infra/workloads
+```
+
+```
+ ✓ YOU SHOULD SEE   HOLD, naming the scan's finding on the Scan line
+                    ●●●●✗·  RECOVERABLE  ·  RPO <n>h
+                    ✗ Scan      recovery point failed threatscan — 2 malware
+                                item(s) found in the recovery point
+
+                    HOLD  exit 1
+```
+
+```
+ ? WHY THIS MATTERS
+   Three checks, one finding, each from a different place. The scan read
+   the copy from the recovery plane. The drill restored it and read the
+   data from the inside. The gate turned both into a number a pipeline
+   acts on.
+
+   Each of them can also say "I could not tell", and that answer never
+   reads as a pass. A check that examined nothing must never report a
+   pass.
+```
+
+**Where you are now.** The backup job said Completed, the restore job said
+Completed and the restored VM was healthy. Every job was green, and the
+recovery point you would have restored from contains the compromise.
 
 ```
  ✦ WHAT YOU JUST PROVED
-   A green pipeline committed a compromise into an immutable vault,
-   and the gate caught it twice: once because proof went stale, once
-   because something looked inside.
+   A green pipeline committed a compromise into an immutable vault.
+   The scan found it from the outside, the drill found it from the
+   inside, and the gate turned that into a HOLD.
 
    Green is a job status, not a verdict about your data.
 ```
@@ -1186,7 +1319,7 @@ and the recovery point you would have restored from contains the compromise.
             restore from, and who decides? The silence is the finding.
  DONE WHEN  you have written down which of the four points you would
             restore from, and why. Nothing to run: the decision is the
-            exercise, and it is the leg no tool measures.
+            exercise, and it is the leg no tool times on its own.
 ```
 
 ### Put it back
@@ -1198,7 +1331,16 @@ op remediate infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the planted files removed, the stashed files restored, and the attester re-run, ending on a verdict line that starts OK:
+ ✓ YOU SHOULD SEE   the planted files removed, the stashed files restored, and the attester re-run and passing, then a line that says what the repair has not yet proven
+                        removed the planted artifacts; restored 2 file(s)
+                        from the stash
+                        locked_remaining=0
+                        stash_present=yes
+                        OK: code intact, baseline present, 3 customer
+                        records, no encryption markers, write/read verified
+
+                    Repaired in place. Not proven yet: a new backup, scan
+                    and drill show whether the recovery point is clean.
  ⏱ HOW LONG         up to a couple of minutes, with no output until it is
                     done. The VM has no inbound access, so this runs through
                     the Azure guest agent, which is a single blocking call
@@ -1214,6 +1356,28 @@ op remediate infra/workloads
    that keep no manifest is exactly what comes next: choosing recovery
    points on evidence.
 ```
+
+### The decision before recovery
+
+The repair above was a workshop shortcut: the incident recorded exactly what
+it changed, so it could be undone. In a real incident two decisions come
+first. Somebody declares the incident and authorizes recovery, and somebody
+chooses which recovery point to trust. Both are human decisions, and ResOps
+does not automate them away. It makes sure they are made on evidence.
+
+```list
+ DECLARE            The incident is acknowledged and recovery is
+                    authorized. In your organization this happens in the
+                    incident tool you already use, not in a backup console.
+ DECIDE             A recovery point is picked, and the reason is written
+                    down. The exercise below is this step.
+ CONFIRM            After the drill, somebody signs the service back into
+                    production. Chapter 5 ends there.
+```
+
+Many organizations start their recovery clock at DECLARE, because that is the
+moment the business knows. The number this workshop measures starts earlier,
+at detection, and Chapter 5 explains why.
 
 ### Four recovery points, one decision
 
@@ -1259,15 +1423,15 @@ already abnormal. The compromise may be three days old, or nine.
 
    The gate promotes exactly one point, and it is the one squarely
    inside the incident window. That is not a bug. It is a policy
-   written for OUTAGES answering a question about COMPROMISE.
+   written for outages answering a question about compromise.
 
    A recovery point objective (RPO) target assumes the only cost of an
-   older point is LOST DATA.
-   Under compromise, the freshest point is the most DANGEROUS one.
+   older point is lost data. Under compromise, the freshest point is
+   the most dangerous one.
 
-   Point A is the other lesson. The only point anyone can be certain about costs 400
-   days of orders, and it is only certain because NOTHING WAS VERIFIED
-   between it and last week. That gap is not bad luck. It is the drill
+   Point A is the other lesson. The only point anyone can be certain
+   about costs 400 days of orders, and it is only certain because
+   nothing was verified between it and last week. That gap is not bad luck. It is the drill
    nobody scheduled.
 ```
 
@@ -1278,7 +1442,7 @@ already abnormal. The compromise may be three days old, or nine.
    inside it.
 
    That is Mean Time to Clean Recovery (MTCR). Not time to recovery. Time to
-   CLEAN recovery. The word "clean" is the entire argument.
+   clean recovery. The word "clean" is the point.
 ```
 
 ```
@@ -1323,7 +1487,7 @@ op backup infra/workloads
                     backup job 8211044 on group 12345…
                     backup Completed
  ⏱ HOW LONG         about two minutes
- ✗ IF NOT           if it sits on "Waiting", it is queued for a media agent: the shared worker that moves the data. Waiting for one is normal and not a failure. DO NOT KILL IT.
+ ✗ IF NOT           if it sits on "Waiting", it is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command.
 ```
 
 ### Scan it
@@ -1333,16 +1497,14 @@ op threatscan infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   no threat recorded, and the tool refusing to call that clean. It exits 0 this time: nothing was found, and nothing being found is not a failure.
-                    verdict: no threat recorded for this workload - which
-                    is NOT the same as clean, and does not clear the Scan
-                    rung on its own
- ✓ THIS IS EXPECTED  the words NOT the same as clean. A scan that finds nothing does not prove the copy is clean, so the tool will not say it is. The drill that follows is what proves it.
- ⏱ HOW LONG         about three minutes, and up to six. The job id prints
-                    straight away, then the client polls every 20
-                    seconds until the scan finishes. Silence in between is
-                    the poll interval, not a hang.
- ✗ IF NOT           if it stops and asks for scan_plan_id, set it in config/workshop.yaml and run it again.
+ ✓ YOU SHOULD SEE   no threats found, and the tool saying what that does not prove. It exits 0 this time: nothing was found, and nothing being found is not a failure.
+                    verdict: no threats found. A scan cannot prove a recovery
+                    point is clean; the restore drill checks that.
+ ✓ THIS IS EXPECTED  the words cannot prove. A scan that finds nothing does not prove the copy is clean, so the tool will not say it is. The drill that follows is what proves it.
+ ⏱ HOW LONG         about three minutes, sometimes up to nine. The job waits
+                    for a scanning worker first; the progress line keeps
+                    moving while it does.
+ ✗ IF NOT           `Commvault: No suitable access node found` means no scanning worker was free: run the scan once more.
 ```
 
 ```
@@ -1380,13 +1542,13 @@ op restore infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the same verdict block as Chapter 1, read from inside a fresh copy of the clean point, and written to the same file. This one overwrites the attestation the incident made stale.
+ ✓ YOU SHOULD SEE   the same verdict block as Chapter 1, read from inside a fresh copy of the clean point, and written to the same file. This one overwrites the dirty attestation from Chapter 3's drill.
                     attestation: PASS — attested clean
-                                 OK: code intact, baseline present,
+                                 code intact, baseline present,
                                  3 customer records, no encryption
                                  markers, write/read verified
  ✓ THEN IT WAITS    the same Enter prompt as Chapter 1, before the restored copy is deleted.
- ⏱ HOW LONG         about five minutes to the verdict, then it waits for you.
+ ⏱ HOW LONG         about three minutes to the verdict, then it waits for you.
  ✗ IF NOT           a guest-agent-not-ready failure on a fresh restore is transient: run it again. Any FAIL: line is the attester doing its job, so read it before you retry.
 ```
 
@@ -1395,11 +1557,12 @@ op gate infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the verdict back where it started, on new evidence rather than on time passing. The job id on the evidence line is the drill you just ran, not the one from Chapter 1.
+ ✓ YOU SHOULD SEE   the verdict back where it started, on new evidence rather than on time passing. The job id on the evidence line is the drill you just ran, not the one from Chapter 1. Under the verdict is your own Mean Time to Clean Recovery.
                     ●●●●●●  VALIDATED
                     ✓ recovery proven — job 8211107
 
                     PROMOTE  exit 0
+                    mtcr       <n> min · threat detection to verified clean restore
  ✗ IF NOT           if it says HOLD and names coverage, a backup ran after your drill: run the drill again, then re-gate.
 ```
 
@@ -1439,6 +1602,30 @@ the decision. That leg is also why it is smaller than a real incident would
 be: here the decision was a guided exercise, not an afternoon of people
 arguing over a recovery point.
 
+Your own number is on the `mtcr` line under the gate verdict, and in
+`evidence/<your-codename>/report.md`. The wall shows the average across every
+workload that has one.
+
+### Where the clock starts and stops
+
+Every measure of recovery time has to choose where its clock starts and stops,
+and organizations choose differently:
+
+```list
+ at detection       This workshop. The scan's finding is stamped
+                    automatically, so the number is repeatable, and it
+                    includes the time spent deciding.
+ at declaration     Common in incident reports: from the moment the
+                    incident is declared and recovery authorized.
+ to sign-off        Some stop the clock when the service is approved back
+                    into production, rather than when the data is verified.
+```
+
+None of these is wrong. What matters is that everyone reading the number
+knows which one it is, which is why this one always says `threat detection to
+verified clean restore` beside it. When you bring MTCR to your own team, agree
+where the clock starts before agreeing a target for it.
+
 ```
  ? WHY THE CLOCK STOPS AT VERIFY AND NOT AT RESTORE
    A restore that finishes is a machine that booted. A restore that
@@ -1450,6 +1637,14 @@ arguing over a recovery point.
    than a fast one. A workload nobody verified has no clean recovery
    to have been mean time to.
 ```
+
+### Back into service
+
+The gate says PROMOTE. In production, one decision remains: somebody approves
+the service back into production. That is the CONFIRM step from Chapter 4, and
+in your organization it is the approval your pipeline already requires, a
+required reviewer or a change record. The gate supplies the evidence for that
+decision. It does not make it.
 
 ```
  ✦ WHAT YOU JUST CLOSED
@@ -1494,7 +1689,7 @@ failure:
  lint        -> merge blocker
 ```
 
-Each time it was the same fight. Each time nobody argued after the first
+Each time it met the same resistance. Each time nobody argued after the first
 year. This workshop is about the fourth one.
 
 ### The estate
@@ -1621,8 +1816,8 @@ resops gate config/estate.yaml; echo "exit $?"
 ```
  ? THE OBJECTION THIS ANSWERS
    Point this at a real estate and almost everything HOLDs on day one.
-   Correctly. But then nobody can ship, so the check gets deleted by
-   Friday.
+   Correctly. But then nobody can ship, so the check gets switched
+   off.
 
    So a workload can declare a DATED tolerance:
 
@@ -1706,15 +1901,15 @@ Your row had to be **told** to go. Nothing on that wall expires, notices, or
 checks back. Until teardown said so, it read VALIDATED, PROMOTE, recovered in
 minutes, for a machine that had already stopped existing.
 
-That is not a quirk of this stack. It is how every stale green dashboard in
-your company got that way, and this repository has already met the vendor's
-version of it: three VMs deleted from Azure still reporting Protected. A
-dashboard is only as honest as the thing publishing to it, which is why the
-command that removed the workload also removed its claims.
+That is not a quirk of this stack. It is a common way dashboards go stale,
+and this repository has met the vendor's version of it: three VMs deleted from
+Azure still reporting Protected. A dashboard is only as accurate as the thing
+publishing to it, which is why the command that removed the workload also
+removed its row.
 
-Worth carrying home from a workshop about proof: the last thing you learned
-today is that the wall you spent two hours trusting was only ever trustworthy
-because something took responsibility for taking things off it.
+The same holds for any dashboard you rely on: it stays accurate only if
+something is responsible for removing entries when the things they describe
+stop existing.
 
 ```
  ? HOW IT WORKS: WHAT A TEARDOWN HAS TO SWEEP
@@ -1809,9 +2004,9 @@ One workload produced four verdicts in two hours.
 
 ![One workload, two hours, four answers.](images/verdict-trail.svg)
 
-Nothing in that trail moved because the VM changed. It moved because what
-had been **opened and read** changed. That is assumption-based resilience
-becoming evidence-based, in four verdicts.
+Every job in that trail reported success. The verdicts changed because of
+what had been **opened and read**, not because a job said Completed. That is
+assumption-based resilience becoming evidence-based, in four verdicts.
 
 ### The fourth gate
 
@@ -1869,10 +2064,9 @@ Four ResOps ideas are below. These are the Commvault Cloud capabilities that
 carried them, so you can name them to a colleague or look them up later.
 
 ```list
-@command-center Command Center    The web console. You opened it to bring a
-                   new Azure workload under protection, and again to read
-                   the threat view. Every operation you performed was an
-                   API call.
+@command-center Command Center    The web console. You opened it to discover
+                   a new Azure workload, and again to read the threat view.
+                   Every other operation you performed was an API call.
 @data-protection Protection plan   The policy: how often to back up, how long
                    to keep it, and to which storage. A workload picks a plan.
                    It does not configure recoverability itself.
@@ -1885,11 +2079,11 @@ carried them, so you can name them to a colleague or look them up later.
                    production. It found the two planted files and honestly
                    reported no encryption: the `.locked` files are renamed
                    rather than encrypted, so a content scan finds nothing,
-                   and the marker check in `verify.sh` is what would flag
-                   them. It runs on demand, or when an anomaly trips it. It
-                   does not run on a schedule, and that is the mechanism
-                   behind the engine's rule: no threat recorded is not the
-                   same as clean, because nothing may have looked.
+                   and the marker check in `verify.sh` is what flagged them
+                   in the Chapter 3 drill. It runs on demand, on a plan's schedule, or when an
+                   anomaly trips it. Whichever it was, a scan that finds
+                   nothing has not proven the point clean, which is why the
+                   drill, not the scan, clears the Scan rung.
 ```
 
 Everything else you ran was ours and is in this repository: the readiness

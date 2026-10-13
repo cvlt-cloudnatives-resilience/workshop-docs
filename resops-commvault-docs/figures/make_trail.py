@@ -1,6 +1,6 @@
 """Compose images/verdict-trail.svg: the workshop's thesis as one artifact.
 
-Four verdicts, three causes. Colors mirror theme/assets/tokens.css
+Four verdicts, three causes, in the order of the workshop's loop. Colors mirror theme/assets/tokens.css
 (--yes #30881c / --yes-tint #f3faf1, --no #db2961 / --no-tint #fdf2f5,
 muted #707391); change them there first.
 """
@@ -43,19 +43,20 @@ def cause(x1, x2, top, bottom):
 
 parts = [
     pill(XS[0], "PROMOTE", "op gate"),
-    pill(XS[1], "HOLD", "op gate"),
-    pill(XS[2], "HOLD", "op threatscan"),
+    pill(XS[1], "THREATS", "op threatscan"),
+    pill(XS[2], "HOLD", "op gate"),
     pill(XS[3], "PROMOTE", "op gate"),
-    cause(XS[0]+PILL_W, XS[1], "you took", "a backup"),
-    cause(XS[1]+PILL_W, XS[2], "something", "looked inside"),
+    cause(XS[0]+PILL_W, XS[1], "a backup captured", "a compromise"),
+    cause(XS[1]+PILL_W, XS[2], "the drill", "confirmed it"),
     cause(XS[2]+PILL_W, XS[3], "you", "re-proved it"),
 ]
 
 svg = (
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 175" '
     'width="960" height="175" role="img" aria-label="Four verdicts over two '
-    'hours: PROMOTE, then HOLD after a backup, then HOLD after something '
-    'looked inside, then PROMOTE after re-proving it.">\n'
+    'hours: PROMOTE, then THREATS when a scan found a compromise a backup had '
+    'captured, then HOLD at the gate after the drill confirmed it, then '
+    'PROMOTE after re-proving it.">\n'
     '  <!-- Colors mirror theme/assets/tokens.css: the yes shade\n'
     '       #30881c on #f3faf1, the no shade #db2961 on #fdf2f5, muted\n'
     '       #707391, ink #00053b. Change them there first. (A CSS variable\n'

@@ -282,9 +282,9 @@ number two sounds like workshop number one without anyone trying to:
 ```
  THE DIAGNOSTICS     ✓ YOU SHOULD SEE · ✗ IF NOT · ⏱ HOW LONG
  READING OUTPUT      Compare, do not guess.
- A BENIGN WAIT       Waiting for one is normal and not a failure.
-                     DO NOT KILL IT.
- THE MEDIA AGENT     the shared worker that moves the data
+ A BENIGN WAIT       That is normal and not a failure. Do not stop the
+                     command.
+ THE MEDIA AGENT     the worker that moves backup data
  A GUEST-AGENT CALL  this runs through the Azure guest agent, which is a
                      single blocking call that reports once at the end
                      rather than streaming
