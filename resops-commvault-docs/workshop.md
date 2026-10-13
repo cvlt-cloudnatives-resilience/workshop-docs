@@ -1,7 +1,7 @@
 # DevOps Meets ResOps
 
 > **A hands-on workshop in Resilience Operations:** proving recovery the way
-> you already prove everything else. Continuously, on evidence, and gated
+> you already prove everything else: continuously, on evidence, and gated
 > before it ships.
 
 ```hero
@@ -19,75 +19,13 @@ $ op gate infra/workloads
 
 ---
 
-## Half Your Pipeline Was Engineered
+## About this workshop
 
-Your delivery pipeline is versioned, automated, owned and observable at
-every stage: code, build, deploy, observe, respond. You would not accept a
-manual step in any of them, and you would not ship a service whose deploy
-path had never run.
-
-Recovery has four equivalent stages, and in most cloud teams none of them
-works that way.
-
-```
-  ENGINEERED   Code ── Build ── Deploy ── Observe ── Respond
-  A HANDOFF    Recover ┄┄ Validate ┄┄ Prove ┄┄ Improve
-```
-
-For most cloud teams that second row belongs to another team, lives in a
-runbook, and is exercised once a year by someone who does not deploy your
-code. That is not a criticism of anyone. It is the half nobody got to yet.
-
-```list
- DevOps      optimizes for   Speed and reliability of delivery.
- SecOps                      Detection and containment of threats.
- IT Ops                      Stability and availability of systems.
- CloudOps                    Cost and performance of infrastructure.
-```
-
-All four assume the business is running normally. ResOps is the only one
-built for the moments when it is not.
-
-## What is ResOps?
-
-Resilience Operations is the operational discipline that unites security,
-infrastructure, and operations teams around critical services, resilient
-system design, and continuous validation, so an organization can withstand
-disruption, recover within defined impact tolerances, and prove it with
-evidence.
-
-It is an operating model, not a product.
-
-```
- Backup asks    do we have copies?
- DR asks        can we recover if the data center is down?
- BCP asks       have we written down what we would do?
- ResOps asks    can we PROVE critical services recover, clean,
-                within tolerance, on demand?
-```
-
-The first three questions can be answered from a document. The fourth can
-only be answered by opening a recovery point and reading what is inside it,
-which is what you spend the next two hours doing to a real service.
-
-## Who this is for
-
-```list
- LEVEL            300-400.
- DURATION         Two hours facilitated, about three hours self-paced.
- WRITTEN FOR      Platform engineers, SREs and cloud architects who already
-                  run CI, infrastructure as code and required checks, and
-                  the people who fund that work.
- ASSUMES          You are comfortable with a terminal, a pull request and a
-                  cloud console. No backup or recovery background is needed.
- NOT FOR          Teams looking for a backup product evaluation, or a
-                  step-by-step guide to configuring one. Neither is what
-                  this covers.
- YOU WILL LEAVE   Able to explain, and to demonstrate, why recoverability
-                  belongs in the same place as your other required checks.
-```
-
-## The one idea
+Your delivery pipeline is versioned, automated and gated. Recovery usually is
+not: it lives in a runbook and is tested once a year, if at all. Resilience
+Operations (ResOps) is the discipline of running recovery the way you run
+delivery, so that you can prove a critical service recovers, clean, on
+demand.
 
 ```statement
 You gate on tests.
@@ -95,84 +33,79 @@ You gate on security scans.
 **You do not gate on recoverability.**
 ```
 
-You have taken a whole class of failure and moved it from *we find out in
-production* to *we find out at the pull request*, three times over.
+In this workshop you build a real service on Azure, protect it with Commvault
+Cloud, compromise it on purpose, and prove its recovery with evidence. Then
+you gate a pipeline on the result, the same way you already gate on tests.
 
-
-## What you will walk
+## Who this is for
 
 ```list
- Building the Workload        Recovery, demonstrated. Most estates have
-                              never done it once.
- Reading the Proof            What good looks like, on a day when yes is
-                              boring.
- Introducing a Compromise     Green is a job status, not a verdict about
-                              your data.
- Choosing a Recovery Point    Under compromise, the freshest recovery
-                              point is the most dangerous one.
- Re-Proving Recovery          Trust is re-opened, not re-assured.
- Gating the Pipeline          The fourth shift-left, shaped exactly like
-                              the other three.
- Cleaning Up                  Disposable by design, because a drill has
-                              to be cheap to repeat.
+ LEVEL            300-400.
+ DURATION         About two hours, facilitated.
+ WRITTEN FOR      Platform engineers, SREs and cloud architects who already
+                  run CI, infrastructure as code and required checks, and
+                  the people who fund that work.
+ ASSUMES          You are comfortable with a terminal, a pull request and a
+                  cloud console. No backup or recovery background is needed.
+ YOU WILL LEAVE   Able to explain, and to demonstrate, why recoverability
+                  belongs in the same place as your other required checks.
 ```
 
-Some of these chapters run against a real Azure VM and a real backup
-platform. The rest run entirely offline, with no cloud and no token, and
-cannot fail. Setup lists what the live half needs.
+## What you will do
 
-This page works with the network off. In a facilitated session the lab is
-provisioned, drilled and retired for you, and you arrive with your workload
-already at `VALIDATED`.
+```list
+ Building the Workload        You build a service, protect it, and prove
+                              once that it recovers.
+ Reading the Proof            You read what a passing result looks like
+                              and where each of its claims comes from.
+ Introducing a Compromise     You see that a green job status is not a
+                              verdict about your data.
+ Choosing a Recovery Point    You learn why, under compromise, the freshest
+                              recovery point is the most dangerous one.
+ Re-Proving Recovery          You earn the verdict back by checking a new
+                              recovery point.
+ Gating the Pipeline          You add recoverability as a fourth required
+                              check, built like the other three.
+ Cleaning Up                  You remove everything you built and verify
+                              that it is gone.
+```
 
-**The expected results on this page come from running the commands: the
-offline ones on this repository, the live ones in a run against a real Azure
-subscription and Commvault Cloud tenant in September 2026.** A few messages
-were reworded after that run and are quoted from the code. Job ids, times and
-names will differ on your screen. If anything else does not match a box, the box tells you
-what to do about it. If it still does not match, tell your facilitator: the box
-may be the thing that is wrong.
+Most chapters run against your own Azure VM and Commvault Cloud. Chapters 4
+and 6 also run offline examples that need no cloud account.
+
+This page works with the network off. The expected results in each box come
+from real runs, so job ids, times and names will differ on your screen. If
+anything else does not match a box, follow the box's instructions, and tell
+your facilitator if it still does not match.
 
 ## Setup
 
-Ten minutes of readiness, so the rest of the workshop is all signal. In a
-facilitated session most of this is done for you.
+Setup takes about ten minutes.
 
-**What you need.** Almost nothing: the environment is built for you.
+**What you need.** The environment is built for you, so you need very little.
 
 ```list
- a Codespace                Open this repository in a Codespace and wait for
-                            it to finish building. `resops`, `op`, `az` and
-                            `terraform` are already on your PATH, and
-                            Grafana, Prometheus and a pushgateway are already
-                            running beside you.
- five credentials           Three for Azure and two for Commvault Cloud, from
-                            your facilitator. They go in `.env`, which you
-                            create by renaming `.env.example`.
+ a Codespace                Your own resops-lab Codespace, fully built.
+                            `op`, `resops`, `az` and `terraform` are already
+                            on your PATH, and Grafana, Prometheus and a
+                            pushgateway are already running beside it.
+ seven values               Three Azure credentials, two Commvault Cloud
+                            tokens, your codename and your resource group,
+                            all from your facilitator's credentials file.
 
-                            The Commvault pair is issued to you alone. It
-                            rotates each time it renews, so a pair shared
-                            with anyone, or pasted into a second Codespace,
-                            stops working for whoever renews second.
-
-                            The Azure credential is a service principal
-                            scoped to ONE resource group, issued to you. It
-                            cannot reach anything else in the subscription,
-                            which is why several checks in this workshop
-                            report **skipped** rather than failing.
- three fields               In `config/workshop.yaml`: your codename, your
-                            resource group, and the attestation path. Every
-                            other id in that file is already filled in and is
-                            the same for everyone.
- nothing else               No clone, no virtual environment, no `az login`
-                            beyond the one step in this workshop, and no
-                            local install of anything.
+                            The Azure credential can reach only your own
+                            resource group, which is why several checks
+                            report **skipped** rather than failing. The
+                            Commvault token pair is yours alone: each
+                            renewal replaces it, so a pair that is shared or
+                            pasted into a second Codespace stops working.
+ nothing else               You do not clone, install or edit anything else.
+                            `config/workshop.yaml` is shared and already
+                            filled in.
 ```
 
-**This lab provisions real Azure resources and they bill until you retire
-them in Cleaning Up, the closing chapter of the self-paced path.** Budget
-eight minutes for it, and do not skip it. In a facilitated session the
-facilitator retires the lab.
+**This lab creates real Azure resources, and they bill until you remove them
+in Chapter 7, Cleaning Up.** Do not skip that chapter.
 
 ### How to read the commands on this page
 
@@ -198,12 +131,13 @@ numbered step is explanation: read it, but there is nothing to run.
 Two rules hold for every command in this workshop:
 
 ```list card
- where     Run it from the repository root, `/workspaces/resopsv2-demo`. A new
-           terminal starts there. If you have used `cd`, run
-           `cd /workspaces/resopsv2-demo` first.
- op        Every `op` command ends with `infra/workloads`, the folder that
-           holds your Terraform. `op validate` on its own prints a usage line
-           and does nothing.
+ where to run   Run every command from the repository root,
+                `/workspaces/resops-lab`. A new terminal starts there.
+                If you have used `cd`, run `cd /workspaces/resops-lab`
+                first.
+ op commands    Every `op` command ends with `infra/workloads`, the folder
+                that holds your Terraform. Without it, `op` prints a usage
+                line and does nothing.
 ```
 
 ### Prove your machine is ready
@@ -214,78 +148,59 @@ which op resops
 
 ```
  ✓ YOU SHOULD SEE   two paths, both inside the Codespace. That is the whole check.
-                    /workspaces/resopsv2-demo/.venv/bin/op
-                    /workspaces/resopsv2-demo/.venv/bin/resops
- ✗ IF NOT           `op: command not found` means the Python environment is not on your PATH. Run `source .venv/bin/activate` and try again. If that says No such file or directory, setup did not finish: run `bash .devcontainer/postCreate.sh`, then open a new terminal. In a room, ask now rather than when the first command runs.
+                    /workspaces/resops-lab/bin/op
+                    /workspaces/resops-lab/bin/resops
+ ✗ IF NOT           `op: command not found` means `bin/` is not on your PATH, usually because setup did not finish. Run `bash .devcontainer/postCreate.sh`, then open a new terminal and try again. In a room, ask now rather than when the first command runs.
 ```
 
 ### Create your .env
-
-Rename `.env.example` to `.env`.
 
 ```bash
 mv .env.example .env
 ```
 
 ```
- ✓ YOU SHOULD SEE   nothing.
+ ✓ YOU SHOULD SEE   no output. The command prints nothing when it works.
 ```
 
 ```do
 1. Open `.env` in the editor.
-2. Copy your five credentials into it from the credentials file your
+2. Copy your seven values into it from the credentials file your
    facilitator gave you. Keep the quotes around `ARM_CLIENT_SECRET`.
 3. Save the file.
 ```
 
 ```
- ✓ YOU SHOULD SEE   every line filled in, with no empty value after an `=`. The secret keeps its single quotes.
+ ✓ YOU SHOULD SEE   every line filled in, with no empty value after an `=`. The secret keeps its quotes.
                     ARM_CLIENT_ID=<...>
-                    ARM_CLIENT_SECRET='<...>'
+                    ARM_CLIENT_SECRET="<...>"
                     ARM_TENANT_ID=<...>
                     CV_ACCESS_TOKEN=<...>
                     CV_REFRESH_TOKEN=<...>
-```
-
-### Fill in workshop.yaml
-
-Your credentials file lists the three values under **Your three FILL fields
-in config/workshop.yaml**. Copy them exactly.
-
-```do
-1. Open `config/workshop.yaml`.
-2. Under `workload`, replace the three values marked FILL:
-   `name`, `resource_group` and `attestation_file`.
-3. Save the file.
-```
-
-```
- ✓ YOU SHOULD SEE   the three lines, with your own values in place of the placeholders.
-                      name: "<your-codename>"
-                      resource_group: "rg-lab-<your-handle>"
-                      attestation_file: evidence/attestations/<your-codename>.json
- ✗ IF NOT           the `attestation_file` name must match `name` exactly, or a passing restore drill still reads as a gap.
+                    TF_VAR_codename=<your-codename>
+                    TF_VAR_resource_group=rg-lab-<your-handle>
 ```
 
 ### Load your credentials
 
-Load `.env` into this terminal. The `set -a` part exports every value, so
-Terraform and `op` can read them as well as the shell.
+Terraform reads `.env` only through the shell, so the terminal has to re-read
+the file after every edit. Open a new terminal, which loads `.env`
+automatically, or run the command below. `op` reads `.env` directly and does
+not need this step.
 
 ```bash
-set -a; source .env; set +a
+set -a; . ./.env; set +a
 ```
 
 ```
- ✓ YOU SHOULD SEE   nothing.
- ✗ IF NOT           `No such file or directory` means you are not in the repository root, or `.env` was not created. Run `cd /workspaces/resopsv2-demo`, then `ls .env`. Run this line again after any edit to `.env`.
+ ✓ YOU SHOULD SEE   no output. The command prints nothing when it works.
+ ✗ IF NOT           `No such file or directory` means you are not in the repository root, or `.env` was not created. Run `cd /workspaces/resops-lab`, then `ls .env`. Run this command again, or open a new terminal, after any edit to `.env`.
 ```
 
 ### Sign in, and check what you filled in
 
-Terraform reads the `ARM_*` values you exported. The `az` CLI does not, and
-several checks in this workshop go through it. One block does both: sign in,
-then read your own config back.
+The `az` CLI does not read `.env`, so this block signs it in, then checks the
+values you entered.
 
 ```bash
 az login --service-principal \
@@ -295,120 +210,131 @@ op validate infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   a PASS list, ending in the line that says you are safe to start. IAM reports skipped: that check needs subscription-level read, which your credential does not have, and skipped is the honest word for it.
-                    PASS  config/workshop.yaml — no placeholder values
+ ✓ YOU SHOULD SEE   a list of PASS lines, ending with the line that says you are safe to climb.
+                    PASS  config/workshop.yaml and .env — no placeholder
+                          values
                     PASS  az logged in, correct subscription
+                    PASS  terraform not yet applied in infra/workloads —
+                          workload checks skipped
                     validate PASS — safe to climb and teardown
- ✓ THIS IS EXPECTED  IAM reports skipped. Your credential cannot read at subscription level, so the check cannot run. Skipped is not a failure, and there is nothing to fix.
+ ✓ THIS IS EXPECTED  two PASS lines say skipped. The IAM check is skipped because your credential cannot read at subscription level. The workload checks are skipped because you have not run `terraform apply` yet. Skipped is not a failure, and there is nothing to fix.
  ⏱ HOW LONG         about ten seconds
- ✗ IF NOT           the FAIL line names the field. `has N unfilled field(s)` lists every one it found by name: you have not finished `config/workshop.yaml`. `az not logged in` means the login above did not take, usually a secret pasted without its quotes.
+ ✗ IF NOT           read the FAIL line, because it names the problem. `FAIL  2 unfilled field(s): TF_VAR_codename in .env, TF_VAR_resource_group in .env` means those lines in `.env` are empty. Fill them in, save the file, and run the block again. `az not logged in` means the sign-in above did not work. The usual cause is a secret pasted without its quotes.
 ```
 
-This is the only command that reads what you typed. Everything after it
-assumes you got it right, and the field most worth getting right is
-`attestation_file`: it must contain your codename. The restore drill writes
-there and the Scan rung reads there, so a mismatch turns the last step of the
-workshop from a yes into a no, ninety minutes from now.
+Check your codename carefully. It names your VM, your Commvault VM group and
+your evidence files for the rest of the workshop.
 
 ### Open the wall
 
-Your terminal shows one workload at a time. The other screen shows all of
-them at once, and it is the one your organization would actually look at.
-Open it now, while nothing has moved, so you have seen the starting state.
+The Grafana dashboard, called the wall in this guide, shows every workload at
+once. Open it now so that you see the starting state.
 
 ```do
-1. Open the **Ports** tab in your Codespace and open port 3000, labeled
-   Grafana, ResOps dashboard.
-2. Sign in as `admin`, password `resops`.
-3. Open **ResOps → DevOps Meets ResOps**.
+1. In your Codespace, open the **Ports** tab, then open port 3000. Its label
+   names Grafana and the ResOps dashboard.
+2. Sign in with the username `admin` and the password `resops`.
+3. Open the **ResOps** folder, then the **DevOps Meets ResOps** dashboard.
 ```
 
 ```
- ✓ ON THE WALL      six services you did not build, and three numbers asking three different questions: how many cannot prove recovery, how fast a clean one takes, and how often checking found something. It was populated when your Codespace was built, from committed fixtures, so it is not empty and it is not yours.
-                    Cannot prove recovery          5 of 6
-                    Mean Time to Clean Recovery    3 hr
-                    Checks that found a problem    1 of 3
- ✗ IF NOT           an empty dashboard means the seed did not run. `bash .devcontainer/postCreate.sh` publishes it again. A login loop means the browser cached an old session: open the port in a private window.
+ ✓ ON THE WALL      six sample services and three numbers: how many cannot prove recovery, how long a clean recovery takes, and how often a check found something. The samples were loaded when your Codespace was built, so none of this is yours yet.
+                    Cannot prove recovery                 5 of 6
+                    Mean Time to Clean Recovery (MTCR)    3 hr
+                    Checks that found a problem           1 of 3
+ ✗ IF NOT           an empty dashboard means the sample data was not loaded. Run `bash .devcontainer/postCreate.sh` to load it again. If the sign-in page keeps returning, the browser cached an old session: open the port in a private window.
 ```
 
-The middle one carries no color on purpose. It is a measurement, not a
-verdict, and nobody has agreed a target to judge it against. You meet that
-number properly in Chapter 5, measured on your own workload.
+Below the numbers is one band per service. At the default 90-day view, every
+band is a thin strip at the right edge, so set the time picker to Last 3
+hours to see them properly.
 
-Underneath the numbers is a band per service, and every band is flat. Nothing
-in this estate has ever moved, because nothing in this estate has ever been
-run. Yours will not be flat.
-
-Leave this tab open. From here on, every command that moves your workload
-republishes to this page on its way out, and the guide will tell you when to
-look. The two read-only checks, `op validate` and `op preflight`, leave it
-alone: they change nothing, so they claim nothing.
+Leave this tab open. Every command that changes your workload updates the
+wall when it finishes, and this guide tells you when to look.
 
 ### When something fails
 
 Search this page for the text your terminal printed. The left column is the
-error, verbatim. Most failures in a session came from the first five rows,
-which are about the terminal, not the lab.
+error, verbatim. The first eight rows are about the terminal rather than the
+lab, and they cause most problems.
 
 ```list
- op: command not found         The Python environment is not on your PATH.
-                               Run `source .venv/bin/activate`. If that file
-                               is missing, run `bash .devcontainer/postCreate.sh`
-                               and open a new terminal.
+ op: command not found         `bin/` is not on your PATH. Run
+                               `bash .devcontainer/postCreate.sh`, then open
+                               a new terminal.
  usage: op                     The command is missing `infra/workloads`. Every
-                               `op` command ends with it, for example
+                               `op` command must end with it, for example
                                `op validate infra/workloads`.
- not yet applied               `terraform not yet applied in infra/workloads`
-                               means `terraform apply` has not run, or you
-                               are not in the repository root. Run
-                               `cd /workspaces/resopsv2-demo` and try again.
+ not yet applied               `op validate` prints `terraform not yet
+                               applied in infra/workloads` as a PASS line.
+                               Before your first `terraform apply`, that is
+                               expected. After the apply, it means you are
+                               not in the repository root. Run
+                               `cd /workspaces/resops-lab` and try again.
  terraform init                Terraform asks you to run init, or reports
                                missing plugins or an inconsistent lock file.
                                Run `terraform -chdir=infra/workloads init
-                               -input=false` from the repository root. A
-                               plain `terraform init` in the root does not
-                               count, because the Terraform lives in
+                               -input=false` from the repository root. Running
+                               `terraform init` in the root does not work,
+                               because the Terraform files are in
                                `infra/workloads`.
  Please run 'az login'         Terraform cannot see your `ARM_*` values,
-                               because `.env` was loaded without exporting.
-                               Run `set -a; source .env; set +a`.
+                               because this terminal has not loaded `.env`
+                               since you edited it. Open a new terminal, or
+                               run `set -a; . ./.env; set +a`.
+ No codename                   Terraform cannot see `TF_VAR_codename` and
+                               `TF_VAR_resource_group`. Check that both are
+                               filled in `.env`, then open a new terminal or
+                               run `set -a; . ./.env; set +a`, and run the
+                               apply again.
  az not logged in              Run the sign-in block in Setup again. A secret
                                pasted without its quotes is the usual cause.
  CV_ACCESS_TOKEN not set       `.env` is missing or was not saved. Run
                                `ls .env` from the repository root.
  missing workshop.yaml         The file was deleted or renamed. It is
                                tracked, so `git checkout config/workshop.yaml`
-                               restores it. Fill your three fields again.
+                               restores it. There is nothing to fill in: your
+                               own values are in `.env`.
  no `workload` output          `terraform apply` has not run, or ran in a
                                different directory. Run it from the repository
                                root.
- not in /VM                    Discovery has not run. It is the one manual
-                               step in this workshop: Command Center, Protect,
-                               Azure, Protection groups, then Discover from
-                               the row's menu.
+ not in /VM                    Discovery has not run since your VM was
+                               created. Ask your facilitator to run it again.
+                               Then check that your VM is listed in Command
+                               Center under Protect, Cloud discovery, Azure,
+                               Resources.
  no vmgroup for                `op protect` has not run for this workload yet.
+                               Run `op protect infra/workloads`.
  could not run the command     The VM is not running, or its guest agent is
                                not ready. The agent needs about two minutes
                                after boot. Retry once before investigating.
  Waiting                       The job is queued for a media agent, the
-                               worker that moves backup data. Usually a few
-                               minutes, occasionally much longer. Do not stop
-                               the command.
+                               worker that moves backup data. This usually
+                               takes a few minutes and occasionally much
+                               longer. Do not stop the command.
  No suitable access node       A threat scan found no free scanning worker.
                                Nothing is wrong with your workload: run the
-                               scan once more. If it fails the same way, the
-                               scanning service needs an administrator.
- Commvault token is dead       The token pair in `.env` has expired. Create a
-                               new pair in Command Center (your avatar, then
-                               Access Tokens, then Add) and paste both values
-                               into `.env`.
- threatscan trigger refused    The scan plan id is missing or wrong. Set
-                               `scan_plan_id` in `config/workshop.yaml`.
- climb stops at the restore    The drill did not pass, which is the drill
-                               doing its job. Read the `FAIL:` line: it names
-                               what it found inside the restored copy.
- no run to publish             `op gate` has not run yet. `metrics` publishes
-                               the last run rather than taking its own.
+                               scan once more. If it fails the same way, tell
+                               your facilitator.
+ Commvault token is dead       Your Commvault token pair is spent and could
+                               not be renewed. The same problem prints as
+                               `Auth failed: Renewal returned HTTP 4xx`,
+                               sometimes with `invalid/expired` in the
+                               reason, and nothing publishes to the wall
+                               until you fix it. The usual cause is a pair
+                               that was shared or pasted into a second
+                               Codespace. Ask your facilitator for a fresh
+                               pair of your own and paste both values into
+                               `.env`.
+ threatscan trigger refused    The scan plan id is missing or wrong. It is
+                               `scan_plan_id` in the shared
+                               `config/workshop.yaml`, so do not edit it. Tell
+                               your facilitator.
+ no run to publish             No gate has run yet for this config.
+                               `resops metrics` publishes the last gate run
+                               rather than running its own, so run the gate
+                               first, for example
+                               `resops gate config/estate.yaml`.
  does not cover the newest     Something backed up after your last drill, so
                                the proof no longer covers the newest recovery
                                point. Run the drill again. A scheduled backup
@@ -419,9 +345,9 @@ which are about the terminal, not the lab.
                                reached the backup.
 ```
 
-**Before investigating anything, run these three.** All are read-only.
-`op validate` and `op preflight` run even when your Commvault token is dead,
-and tell you so; `op status` needs a working one.
+**Before you investigate anything, run these three commands.** All three are
+read-only. `op validate` and `op preflight` work even when your Commvault
+token is dead and tell you so; `op status` needs a working token.
 
 ```
  op validate infra/workloads     Does your config parse, and are the ids present?
@@ -431,106 +357,66 @@ and tell you so; `op status` needs a working one.
 
 ### Three questions, before anything runs
 
-Write these down now and set them aside; how they read to you afterward is
-the measure of the workshop.
-
-Very few organizations can answer the first question with confidence. That
-is the industry's position today, not a judgment on any one team, and it is
-the reason this workshop exists. An honest low number is worth more here
-than a confident one.
+Write down your answers now, and compare them with what you know at the end
+of the workshop.
 
 ```list
  1   What percentage of your production estate could you PROVE is
-     recoverable, right now?
-
-     Not "is backed up". Proved, by something that opened a copy and read
-     what was inside it. A backup dashboard reports that a job ran. That
-     is a different claim, and most estates have only that one.
+     recoverable right now? Proven means something opened a copy and
+     read it, not that a backup job ran.
  2   Who would you have to convince, and what would they accept as proof?
-
-     Name a real person. An auditor accepts a document. A staff engineer
-     accepts a command they can run themselves. Those are different
-     artifacts, and most teams have only the first.
  3   How long would producing that proof take, starting now?
-
-     Count the people who would have to be asked. Where that answer is
-     measured in weeks, the constraint is usually organizational rather
-     than technical.
 ```
 
 ---
 
-## Chapter 1 · Building the Workload · SOLO
+## Chapter 1 · Building the Workload
 
 ```
  STAGE      All six. Discover, Protect, Detect, Recover, Scan, Validate: the
             full climb, once, so you have seen what a yes is made of.
  EXERCISE   Stand up a production service, protect it, and climb it to a
             proven recovery
- LEARN      The three planes, the one door into a sealed VM, and what a
+ LEARN      The three planes, the only way into a sealed VM, and what a
             drill actually opens
  RULE       Recovery is demonstrated or it is assumed. There is no third
             state.
  NEXT       Pick one workload you own and find out whether the platform has
-            even discovered it. Read-only. Today.
+            even discovered it. This is read-only, and you can do it today.
  DONE WHEN  `op gate infra/workloads` says PROMOTE and exits 0. That is
-            recovery demonstrated rather than assumed. If it holds and
-            names Scan, the drill has not run: `op restore` first.
+            recovery demonstrated rather than assumed. If it says HOLD and
+            names Scan, the drill has not run, so run `op restore
+            infra/workloads` first.
 ```
 
 This chapter builds three environments and moves a workload through all of
-them. They are worth seeing before you start, because every verdict in this
-workshop depends on which one produced it.
-
-### The three planes you are about to build
+them.
 
 ![The three planes. The attacker can reach the workload and never the copies; trust flows one way.](images/three-planes.svg)
 
-The production plane is an Azure VM running a live service, locked down
-the way production should be: no public IP, no inbound rules, no
-interactive access. All operations flow through managed control planes,
-the Azure guest agent and the Commvault Cloud API, which is exactly how
-the workshop's commands, and a real incident response, reach it.
-
-Commvault Cloud copies that service into the recovery plane: immutable
-storage held in the platform's own security domain. The isolation here is not
-a disconnected network. It is that the credentials for that storage belong to
-the service and never to the workload, so nothing running on the VM can reach
-the copies, including anything an attacker puts there. Restore drills rebuild
-a copy of the service in the third plane, verify it from the inside, and
-remove it.
-
-Three planes, and trust flows one way. Every verdict in this workshop is
-read from the copy rather than from the machine that produced it, because a
-compromised machine can only report on itself.
-
-If you have not used Commvault before, this is what you are about to touch:
+Every verdict in this workshop is read from a copy rather than from the
+machine that produced it, because a compromised machine can only report on
+itself.
 
 ```list
-@cloud-server PRODUCTION PLANE   An Azure VM, built by Terraform, running a
-                    small service.
-@secure-storage RECOVERY PLANE   Commvault Cloud, protecting that VM into an
+@cloud-server PRODUCTION PLANE   An Azure VM, built by Terraform, that runs a
+                    small service. It has no public IP and no inbound
+                    rules. Commands reach it only through the Azure guest
+                    agent, a process inside the VM that runs scripts Azure
+                    sends to it.
+@secure-storage RECOVERY PLANE   Commvault Cloud protects that VM into an
                     immutable copy held in its own security domain, with
                     credentials the VM never has.
-@ransomware DETECTION            A scan that opens a recovery point in the
+@ransomware DETECTION            A scan opens a recovery point in the
                     recovery plane and reads it there, without touching
                     production.
-@vm-restore ISOLATED PLANE       An out-of-place restore: a new VM built from
-                    one recovery point, verified from the inside, then deleted.
-@command-center THE CONSOLE      Command Center, the web console the platform
-                    is operated from. Every OPERATION here is an API call,
-                    which is what makes it repeatable. You open the console
-                    once to do the one thing that cannot be scripted, and
-                    twice more to read what your security colleague reads.
+@vm-restore ISOLATED PLANE       An out-of-place restore builds a new VM from
+                    one recovery point, verifies it from the inside, and then
+                    deletes it.
+@command-center THE CONSOLE      Command Center, the Commvault Cloud web
+                    console. You use it to confirm discovery and to see
+                    the threat view. Every other operation is an API call.
 ```
-
-When a concept deserves the fuller story, look for the HOW IT WORKS notes
-as you go.
-
-One `terraform apply` gives you the first of the three: a VM with no public
-IP, no inbound rules and no interactive access. Every command from here
-reaches it through the Azure guest agent or the Commvault Cloud API, and each
-one prints what it did so you can compare it against the box below.
 
 ### Provision the service
 
@@ -539,7 +425,7 @@ terraform -chdir=infra/workloads apply -auto-approve
 ```
 
 ```
- ✓ YOU SHOULD SEE   the apply finish, then one output object. This is the contract: every later command reads these eight facts instead of reconstructing names, so nothing downstream has to guess what you called things.
+ ✓ YOU SHOULD SEE   the apply finish, then one output object. Every later command reads these eight values instead of working out names for itself.
                     Apply complete!
                     Outputs:
                     workload = {
@@ -553,37 +439,21 @@ terraform -chdir=infra/workloads apply -auto-approve
                       "vnet_name" = "resops-<your-codename>-vnet"
                     }
  ⏱ HOW LONG         about two minutes
- ✗ IF NOT           read the first error line and nothing else. Quota and an expired login are the usual causes: run az account show, then retry once. If it asks you to run terraform init, run `terraform -chdir=infra/workloads init -input=false` once, then apply again.
-```
-
-```
- ? HOW IT WORKS: THE ONLY DOOR
-   The VM has no network path in, so commands travel through the Azure
-   guest agent: a process inside the VM that Azure hands scripts to,
-   with your subscription's credentials as the key. Every plant, every
-   repair, and every drill verification in this workshop goes through
-   that one door, and the door works even when the network is
-   compromised.
+ ✗ IF NOT           read the first error line. The usual causes are a quota limit and an expired login. Run `az account show` to check the login, then run the apply once more. If Terraform asks you to run init, run `terraform -chdir=infra/workloads init -input=false` once, then run the apply again.
 ```
 
 ### Connect the platform
 
-Bringing new cloud resources under protection is an operation the platform
-keeps behind its own controls, so this step happens in **Command Center**, the
-Commvault Cloud web console. It is the only operation in this workshop that is
-not an API call, and the only one that may need somebody else: the workshop's
-API token is refused here by design, and depending on how your account is set
-up the console may refuse you too. If it does, your facilitator runs it once
-for the room.
+The platform has to discover a new cloud resource before it can protect it.
+**Your facilitator runs discovery for the room** once everyone's
+`terraform apply` has finished. Your part is to confirm that your VM appears
+in Command Center.
 
 ```do
-1. Sign in to Command Center and open **Protect**, then **Azure**.
-2. Open the **Protection groups** tab. On the workshop's group, open the
-   row's menu (⋮) and choose **Discover**. The group's name is in your
-   session instructions.
-3. Wait for **Last update**, at the top of the page, to change to the
-   current time with a green check beside it.
-4. Open the **Resources** tab on the same Azure page.
+1. Sign in to Command Center.
+2. Open **Protect**, then the **Cloud discovery** tab.
+3. Open **Azure**.
+4. Open the **Resources** tab.
 ```
 
 ```
@@ -591,30 +461,24 @@ for the room.
                     <your-codename>              Azure VM                 eastus2
                     <yourcodename>rst<...>       Azure storage account    eastus2
                     <yourcodename>rst<...>       Azure Table storage      eastus2
- ⏱ HOW LONG         about two minutes. The page does not refresh itself, so
-                    `Last update` is what tells you the job finished.
- ✗ IF NOT           if your VM is missing, discovery ran before your
-                    `terraform apply` finished. Run **Discover** again.
-                    If the menu item is unavailable, or the page returns an
-                    error, your account cannot run discovery on this
-                    connection: ask your facilitator to run it, then re-check
-                    the Resources tab. Nothing else in the workshop needs
-                    this permission.
+ ⏱ HOW LONG         about two minutes after your facilitator starts discovery.
+                    The page does not refresh on its own, so reload it to see
+                    new resources.
+ ✗ IF NOT           if your VM is missing, discovery has not run since your
+                    `terraform apply` finished. Tell your facilitator, wait
+                    for them to run it again, then refresh the Resources tab.
 ```
 
 ```
- ? HOW IT WORKS: WHAT DISCOVERY FOUND
-   Your `terraform apply` created a VM and a storage account used for
-   restore staging, and the console lists the account's table storage as
-   a resource of its own. Discovery lists every one of them because each
-   is an Azure resource in the subscription. Only the VM is your workload.
-
-   Discovery makes a resource visible to the platform. Protecting it is a
-   separate step, and it is what `op protect` does later in this chapter.
-
-   The Resources tab is the same inventory `op preflight` reads. The next
-   command asks the API the question you just answered by eye.
+ ? HOW IT WORKS: WHY THREE RESOURCES
+   Your apply created a VM and a storage account for restore staging,
+   and the console lists the account's table storage separately. Only
+   the VM is your workload. Discovery makes it visible; `op protect`
+   protects it.
 ```
+
+The next command asks the API to confirm what you just checked in the
+console.
 
 ```bash
 op preflight infra/workloads
@@ -624,7 +488,7 @@ op preflight infra/workloads
  ✓ YOU SHOULD SEE   five PASS lines, then the line that says you are safe to climb. The one that matters names your workload as discovered by the platform.
                       PASS  <your-codename> discovered (cloud-native inventory)
                     preflight PASS — safe to climb
- ✗ IF NOT           a FAIL line names its own fix. "not discovered" should not happen now that you have seen your VM in the Resources tab; if it does, the console and the API disagree and the facilitator wants to know.
+ ✗ IF NOT           each FAIL line names its own fix. If a line says `not discovered` even though your VM is in the Resources tab, the console and the API disagree. Tell your facilitator; do not try to run discovery yourself.
 ```
 
 ### The first recovery point
@@ -634,10 +498,10 @@ op protect infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   a VM group created, with your VM's id attached to it. The number is the group's id, and it is what every later command addresses. A VM group is what Commvault Cloud protects: a named set of machines with one protection plan applied to all of them.
+ ✓ YOU SHOULD SEE   a VM group created, with your VM's id attached to it. A VM group is a named set of machines with one protection plan. Its id is what every later command addresses.
                     protected: group 12345  (<your-codename> by <vm-guid>,
                     IntelliSnap off)
- ✗ IF NOT           a failure naming discovery means the platform cannot see your VM yet: run **Discover** again in Command Center, wait for Last update to change, then re-run this.
+ ✗ IF NOT           a failure naming discovery means the platform cannot see your VM yet. Ask your facilitator to run discovery again, confirm your VM in the Resources tab, then re-run this.
 ```
 
 ```bash
@@ -653,33 +517,18 @@ op backup infra/workloads
 ```
 
 ```
- ? HOW IT WORKS: AIR GAP AND IMMUTABILITY
-   The recovery point you just created landed in an air-gapped,
-   immutable storage pool.
-
-   That pool is AIR GAP PROTECT, and it is worth knowing the name,
-   because it is the control the rest of this workshop rests on.
-
-   Air-gapped here is logical, not a cable in a drawer. The pool lives
-   in a separate security domain with its own credentials, held by the
-   backup service, never by the VM. Malware that owns the machine, even
-   as root, has no path to the copies. The service reaches in; nothing
-   reaches back.
-
-   Immutable means retention-locked: for the retention window, the
-   copies cannot be altered or deleted by anyone. Ransomware commonly
-   tries to delete backups before revealing itself.
-   This is the control that makes that move fail.
-
-   The pool keeps every recovery point, including this one. Choosing
-   which point to trust is what the rest of this workshop covers.
+ ? HOW IT WORKS: AIR GAP PROTECT
+   The recovery point landed in Air Gap Protect, an immutable storage
+   pool in a separate security domain. Its credentials belong to the
+   backup service, never to the VM, so malware on the machine has no
+   path to the copies. Retention locking means nobody can alter or
+   delete them during the retention window.
 ```
 
 ### Check it for threats
 
-Before restoring from a recovery point, have the platform read it. Threat
-Scan opens the copy in the recovery plane and looks for malware there, without
-touching the VM.
+Threat Scan opens the recovery point in the recovery plane and looks for
+malware there, without touching the VM.
 
 ```bash
 op threatscan infra/workloads
@@ -694,31 +543,22 @@ op threatscan infra/workloads
  ⏱ HOW LONG         about three minutes, sometimes up to nine. The job waits
                     for a scanning worker first; the progress line keeps
                     moving while it does.
- ✗ IF NOT           `Commvault: No suitable access node found` means no scanning worker was free. Run the scan once more. If it stops and asks for scan_plan_id, set it in config/workshop.yaml and run it again.
+ ✗ IF NOT           `Commvault: No suitable access node found` means no scanning worker was free. Run the scan once more. If it stops and names `scan_plan_id`, tell your facilitator, because that value is in the shared `config/workshop.yaml`.
 ```
 
-```
- ? WHY SCAN BEFORE THE DRILL
-   The two checks answer different questions. The scan asks whether the
-   platform can see anything bad in the recovery point. The drill asks
-   whether the point restores and whether the data inside is intact.
+The scan goes first so that a recovery point that is already flagged is never
+restored. It cannot prove the point is clean, because a scan reports only
+what it matched. Only the restore drill opens the copy and checks it from the
+inside.
 
-   The scan goes first so that a point already flagged is never restored.
-   It cannot go last, because "nothing found" is not proof of clean: a
-   scan reports what it matched, and silence is not a verdict. Only the
-   drill opens the copy and checks it from the inside.
-```
-
-These four steps (backup, scan, drill, gate) are the loop the rest of this
-workshop repeats. You will run it three times: now, on a clean workload, with
-the gate at the start of Chapter 2; in Chapter 3, on a compromised one; and in
-Chapter 5, after the repair.
+Backup, scan, drill and gate are the loop the rest of the workshop repeats:
+here on a clean workload, in Chapter 3 on a compromised one, and in Chapter
+5 after the repair.
 
 ### Prove it restores
 
-A recovery point existing is not the same as a recovery point working, and
-only a restore drill can tell them apart: rebuild a copy from the point, in
-isolation, and verify it from the inside.
+The restore drill builds a new VM from the recovery point, runs a check
+inside it, and then deletes it. Production is never touched.
 
 ```bash
 op restore infra/workloads
@@ -734,7 +574,7 @@ op restore infra/workloads
                                    3 customer records, no encryption
                                    markers, write/read verified
                                    → evidence/attestations/<your-codename>.json
- ✓ THEN IT WAITS    the drill stops and asks you to press Enter before it deletes the restored copy. It is not stuck. The copy is up in Azure right now, and this is the only moment it exists.
+ ✓ THEN IT WAITS    the drill stops and asks you to press Enter before it deletes the restored copy. It is not stuck. The copy is running in Azure now, and this is the only time it exists. Press Enter when you are ready to continue.
                     ✓ RECOVERED: <your-codename>-restore is running in
                       Azure (RG rg-lab-<your-handle>).
                     Press Enter to tear it down…
@@ -742,46 +582,27 @@ op restore infra/workloads
  ✗ IF NOT           a guest-agent-not-ready failure on a fresh restore is transient: run it again. Any FAIL: line is the attester doing its job, so read it before you retry.
 ```
 
-```
- ? HOW IT WORKS: WHAT A DRILL RESTORE IS
-   An out-of-place restore builds a NEW VM from the recovery point's
-   disk: fresh machine, fresh identity, no connection to production.
-   The attester runs inside that copy, writes its verdict, and the
-   copy is deleted. Production never stops, never rolls back, and
-   never meets the restored machine. That is why drills are safe to
-   run on any schedule: the blast radius is one disposable VM.
-```
-
 ### Your row on the wall
 
-Go back to the Grafana tab and let it refresh.
+Return to the Grafana tab and wait for it to refresh.
 
 ```
- ✓ ON THE WALL      a seventh service, carrying your codename, sitting at the top of the table where the six fixtures are not. Its band starts at the moment you ran the first command and climbs.
+ ✓ ON THE WALL      the headline counts you: its total goes from 6 to 7. Then find your codename in the table, **Every service, furthest from proven first**. A proven workload sorts last, so yours is at the BOTTOM, beside payments-api. Scroll inside the table if you cannot see it.
                     Cannot prove recovery          5 of 7
                     <your-codename>   VALIDATED    proven just now
- ✗ IF NOT           the page refreshes every ten seconds; give it one cycle. If your row is still missing, your terminal already said why: a publish that fails prints `(dashboard not updated: …)` with the reason, and it never stops the command it was attached to.
-                    (dashboard not updated: <the reason>)
+ ✗ IF NOT           the page refreshes every ten seconds; give it one cycle. If the total still reads 6, your workload never published, and your terminal says why. `Auth failed: …` means your Commvault token is dead, so nothing could publish; see the token row in When something fails. Any other failure prints `(dashboard not updated: …)` with the reason, and it never stops the command it was attached to.
 ```
 
-You never ran a command to put it there. Every `op` command that changes
-where a workload sits ends by republishing, so the position on the wall is
-the position in the tenant rather than the position somebody last remembered
-to upload.
-
-Look at the last two lines of any command you have run. `dashboard` is what
-the wall now says, and `next` is the one command that would move it. The
-terminal and the wall are the same story told at two scales.
+You did not publish your row by hand. Every `op` command that changes your
+workload updates the wall when it finishes. The last two lines of each
+command show the link: `dashboard` says what the wall now shows, and `next`
+names the command that would change it.
 
 ```
  ✦ WHAT YOU JUST BUILT
-   A sealed production service, a recovery point in a vault the
-   service itself cannot touch, and a drill that proved the point
-   restores clean. That is recovery demonstrated rather than
-   assumed, which is the step most estates have never taken.
-
-   And a row on a wall that says so, published by the work rather
-   than by a person reporting on the work.
+   You built a sealed production service, a recovery point it cannot
+   touch, and a drill that proved the point restores clean. Your row on
+   the wall says so, published by the work itself.
 ```
 
 ## Chapter 2 · Reading the Proof
@@ -796,14 +617,14 @@ terminal and the wall are the same story told at two scales.
             meaningful.
  NEXT       Open the bar your workloads are judged against. If it does not
             state a number somebody tests, you have found your first gap.
-            Read-only. Today.
+            This is read-only, and you can do it today.
  DONE WHEN  you can point at the line in `op gate` that is the evidence,
-            and say where its job id came from. Nothing to run here: this
-            chapter reads what Chapter 1 earned.
+            and say where its job id came from. Every command in this
+            chapter only reads; none of them changes your workload.
 ```
 
-Your workload is at the top of its ladder. This chapter reads what good
-looks like and where each claim comes from, before anything gets broken.
+Your workload is at the top of its ladder. This chapter shows where each part
+of that result comes from.
 
 ### Read the ladder
 
@@ -831,23 +652,21 @@ op status infra/workloads
                     evidence   evidence/<your-codename>/bundle.json
                     dashboard  2 of 7 provable across the estate
                     next       op gate infra/workloads
- ✗ IF NOT           re-run the climb that built this workload. In a room, tell the facilitator your codename rather than debugging it yourself.
+ ✗ IF NOT           repeat the Chapter 1 steps that built this workload. In a room, tell the facilitator your codename rather than debugging it yourself.
 ```
 
-Every line of that output pairs a recovery fact with a practice you already
-run:
+Each stage pairs a recovery fact with a practice you already run:
 
 ```list
- discover    Service discovery. Is the workload onboarded into a VM group?
- protect     GitOps drift detection. Does declared coverage match actual?
+ discover    Service discovery. Is the workload in a VM group?
+ protect     Drift detection. Does declared coverage match actual?
  detect      A health check. Did the last backup complete cleanly?
  recover     Rollback readiness. Is the recovery point recent enough?
- scan        Artifact scanning before deploy. Has anything read the copy?
- validate    A restore drill. Has recovery been demonstrated, not assumed?
+ scan        Artifact scanning. Has anything read the copy?
+ validate    A restore drill. Has recovery been demonstrated?
 ```
 
-Six stages, and clearing each one moves you up a state. Seven states, because
-there is one for having cleared none:
+Clearing each of the six stages moves the workload up one of seven states:
 
 ```
  UNDISCOVERED ─▸ DISCOVERED ─▸ PROTECTED ─▸ MONITORED ─▸ RECOVERABLE ─▸ TRUSTED ─▸ VALIDATED
@@ -858,14 +677,9 @@ there is one for having cleared none:
    exists                                                  exists        clean     confirmed
 ```
 
-You will see your own workload at VALIDATED and stay there. The estate in
-Chapter 6 is where the lower states show up: one workload sits at MONITORED
-and one never left UNDISCOVERED, and the state alone does not tell you which
-is which. The stage that blocked them does.
-
-Only the last state is a claim about recovery. The other six are claims about
-the machinery around it, which is why an estate can be almost entirely green
-on a backup dashboard and almost entirely short of VALIDATED here.
+Only VALIDATED is a claim about recovery. The other states describe the
+machinery around it, which is why an estate can look green on a backup
+dashboard and still fall short here.
 
 ### The bar it passed
 
@@ -886,38 +700,26 @@ op gate infra/workloads
 
 ```
  ? HOW IT WORKS: A BACKUP NOBODY RAN
-   Protection plans usually back up on a schedule as well as on demand,
-   and can scan the new point at the same time. Your facilitator knows
-   whether the plan used today has one.
-
-   A scheduled backup creates a recovery point that nothing has
-   restored and checked. If one runs during your session, your
-   workload drops from VALIDATED to RECOVERABLE with nobody typing
-   anything, and the gate says HOLD. That is correct: the proof was
-   about an older point. A drill on the new point restores the verdict.
-
-   In production this is the normal case, and it is why the check runs
-   on a schedule as well as on every change.
+   A protection plan can also back up on a schedule. A scheduled backup
+   creates a recovery point that nothing has checked, so your workload
+   drops to RECOVERABLE and the gate says HOLD. That is correct, and a
+   drill on the new point restores the verdict.
 ```
 
-Three lines in that output appear on every run from here, so they are worth
-naming.
+Three lines in that output appear on every run from here:
 
 ```
  = held at VALIDATED over 3 runs
-       the trend. Read from this workload's own history, so it answers
-       "is this normal, or did it just change?" without you asking.
+       the trend, read from this workload's own history.
 
  ✓ recovery proven — job 8210533
-       the evidence, and where it came from. A job id, not a policy and
-       not a schedule. Something opened that recovery point and read it.
+       the evidence: the job that opened that recovery point and read it.
 
  PROMOTE  exit 0
-       the verdict and the number a pipeline reads. Two words, and the
-       second one is the whole integration surface.
+       the verdict, and the exit code a pipeline reads.
 ```
 
-The bar it passed is set per tier rather than as a single threshold:
+The bar is set per tier rather than as a single threshold:
 
 ```bash
 cat config/tiers.yaml
@@ -930,32 +732,14 @@ cat config/tiers.yaml
                     attestation_max_age_days
 ```
 
-```
- ? WHY THIS MATTERS
-   A measurable, testable target per critical service is a Service
-   Resilience Indicator. Read the NOTE at the bottom of that file:
-   nobody restore-verifies everything every day, so the policy is not
-   "everything is verified", it is "for THIS tier, something must have
-   opened a recovery point and read it within N days".
-
-   A tier that declares no freshness value is never checked for it.
-   That is a legitimate choice, made explicitly, and still recorded.
-```
-
-```
- ? IF YOU RUN SLOs ALREADY
-   A Service Resilience Indicator is to recovery what a service level
-   objective (SLO) is to reliability: a declared, testable bar per
-   service, owned as policy
-   rather than kept as an intention. Recoverability today is where
-   reliability was before SRE existed: designed up front, improvised
-   in an incident, and unmeasured in between. This file is the
-   missing run layer.
-```
+A measurable target like this, per service tier, is a Service Resilience
+Indicator. It plays the same role for recovery that a service level objective
+plays for reliability.
 
 ### The contract that earned it
 
-The verdict came from this script, which runs inside the restored copy:
+The verdict came from this script, which the drill runs inside the restored
+copy through the guest agent:
 
 ```bash
 grep -A 80 'path: /opt/app/verify.sh' infra/modules/azure-vm/cloud-init.yaml
@@ -965,35 +749,19 @@ grep -A 80 'path: /opt/app/verify.sh' infra/modules/azure-vm/cloud-init.yaml
  ✓ YOU SHOULD SEE   about 70 lines of shell, carrying five checks. The last one WRITES a record and reads it back, and the script ends at exit 0. The start of the next file in the listing may show below that.
 ```
 
-```
- ? WHY YOU READ IT HERE AND NOT OVER SSH
-   That VM has no public IP, no inbound rule, no open ports. You cannot
-   reach it and neither can anything else. The only way in is the guest
-   agent, which is exactly how the drill runs this script INSIDE the
-   restored copy.
+Four of the five checks ask whether the right data is there. The fifth asks
+whether the store still accepts writes, because a read-only disk passes the
+first four and fails a real service on its first write.
 
-   The workload being unreachable is the point. The attester still ran.
-```
-
-Four of the five checks ask *is the right data here?*. The fifth asks *does
-the store still work?*, which none of the others can answer. A read-only
-mount passes the first four and fails a real service on its first write.
-
-```
- ? HOW IT WORKS: WHAT THE DRILL WRITES
-   When a restore drill runs that script inside a restored copy, the
-   verdict line gets captured into an attestation file: which recovery
-   point, what was checked, what it said, when. The gate reads that
-   file. It is evidence, not a flag somebody set, and its history is
-   hash-chained so a rewritten past shows as a broken chain. The next
-   chapter's backup makes this file stale.
-```
+The drill saves the script's verdict in an attestation file: which recovery
+point, what was checked, and when. The gate reads that file, so the verdict
+is evidence rather than a flag somebody set.
 
 ```
  ✦ WHAT YOU JUST READ
-   A proven ladder, a per-tier bar, and a short contract owned by the
-   people who know what "good" means for this service. Every claim
-   traced to something you could open and read.
+   You read a proven ladder, a per-tier bar, and a short contract owned
+   by the people who know what "good" means for this service. Every
+   claim traces to something you can open and read.
 ```
 
 ## Chapter 3 · Introducing a Compromise
@@ -1007,30 +775,21 @@ mount passes the first four and fails a real service on its first write.
             honestly come from
  RULE       Green is a job status, not a verdict about your data.
  NEXT       Take one existing backup of one workload and have something
-            open it and read it. This week. You are not changing anything.
-            You are finding out whether anything ever has.
+            open it and read it. Do it this week. You are not changing
+            anything; you are finding out whether anything ever has.
  DONE WHEN  `op gate infra/workloads` says HOLD and exits 1. HOLD is the
             correct answer in this chapter. If you got PROMOTE the
             incident did not land: run `op incident`, then the loop again
             (`op backup`, `op threatscan`, `op restore`, `op gate`).
 ```
 
-You have a proven workload and a gate that says yes. The next step breaks
-it on purpose, with something harmless and detectable.
-
-This chapter turns on one question:
-
-```
-          Which recovery point did you just prove?
-```
-
-You proved this workload recovers. That proof was about one moment, and
-there will be a newer recovery point with the next backup, scheduled or not. Answer for yourself
-first; the tools give their answer in the next chapter.
+Now you break the workload on purpose, with something harmless and
+detectable, and run the same loop again.
 
 ### Write it down before we break it
 
-Answer this before you run anything in this chapter.
+Answer this before you run anything in this chapter. Chapter 4 asks the same
+question after the tools have answered it.
 
 ```
   If ─────────────────────── happens to my workload,
@@ -1042,9 +801,6 @@ Answer this before you run anything in this chapter.
   and I would know it worked because ─────────────────── .
                                        (what you would check)
 ```
-
-The next chapter asks the same question after the tools have answered it.
-Compare your answer with theirs.
 
 ### Plant the compromise
 
@@ -1068,18 +824,13 @@ op incident infra/workloads
                     done. The VM has no inbound access, so this runs through
                     the Azure guest agent, which is a single blocking call
                     that reports once at the end rather than streaming.
- ✗ IF NOT           check the VM is running: the guest agent needs about two minutes after boot. Retry once, then stop and ask.
+ ✗ IF NOT           check that the VM is running, because the guest agent needs about two minutes after boot. Retry once. If it fails again, stop and ask your facilitator.
 ```
 
-EICAR is a 68-character test string the antivirus industry standardized in
-the 1990s. Every scanner agrees to detect it as though it were malware, so
-that detection can be tested without handling anything dangerous. The
-`.locked` files are high-entropy junk using ransomware's naming convention.
-Nothing here encrypts or damages anything, so the detection is real while the
-damage is not.
-
-Now run the loop from Chapter 1 against the compromised workload: backup,
-scan, drill, gate.
+EICAR is a standard test string that every malware scanner detects, so
+detection can be tested safely. The `.locked` files are random data named the
+way ransomware names encrypted files. Nothing here encrypts or damages
+anything.
 
 ### Commit it into a recovery point
 
@@ -1091,39 +842,15 @@ op backup infra/workloads
  ✓ YOU SHOULD SEE   the same clean, green result you got the first time, under a new job id
                     backup job <n> on group <n>…
                     backup Completed
- ✓ THIS IS EXPECTED  the band on the wall falls two rungs even though the backup succeeded. That drop is the point of this step, not an error.
+ ✓ THIS IS EXPECTED  your band on the wall falls two rungs even though the backup succeeded. That drop is the point of this step, not an error.
  ✓ ON THE WALL      your band steps down two rungs, from VALIDATED to RECOVERABLE. A job that succeeded moved you backwards, because it made a recovery point nothing has verified.
  ⏱ HOW LONG         about two minutes
  ✗ IF NOT           if it sits on "Waiting", it is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command.
 ```
 
-A green job and a falling band, side by side. The job reports that it ran.
-The band reports whether you can prove recovery, and running is not proving.
-
-Widen the time range on the wall and every flat band in that estate reads the
-same way: work happened there, and nothing got better. A backup dashboard
-cannot show that; this one can.
-
-```
- ? WHAT YOU ARE WATCHING
-   Your own planted compromise being committed into a recovery point.
-   The job says Completed, and it is correct: the backup worked.
-   Nothing reports a problem, which is why this is easy to miss.
-
-   The recovery point lands in air-gapped, immutable storage; nothing
-   on the VM, including your compromise, can reach it.
-```
-
-```
- ? HOW IT WORKS: WHAT A RECOVERY POINT IS
-   One frozen moment of the disk, copied out whole. It does not
-   accumulate, it does not update, and it does not know what happened
-   after it. Keep that in mind for the next command.
-```
-
 ### Proof does not carry over
 
-Ask the ladder why it fell. This only reads; it changes nothing.
+Check why the ladder fell. This command only reads.
 
 ```bash
 op status infra/workloads
@@ -1135,30 +862,15 @@ op status infra/workloads
                     ✗ Scan      attestation does not cover the newest recovery
                                 point — verified <n> min before it was taken;
                                 re-run the drill
- ✓ THIS IS EXPECTED  a ✗ on the Scan line. This is the correct reading for a recovery point nobody has verified. Do not re-run the drill to fix it; the next steps explain why.
+ ✓ THIS IS EXPECTED  the Scan line shows ✗. That is the correct reading for a recovery point nobody has verified. Do not re-run the drill to fix it; the next steps explain why.
 ```
 
 ![The attestation covers recovery point 1, and nothing after it.](images/proof-timeline.svg)
 
-Nothing on the machine changed that the ladder can see. The Scan rung needs a
-verified-clean restore of the newest recovery point, and your backup made a
-newer point that nothing has opened. The footer names the drill, the step that
-would settle it; the loop scans first, so a point already flagged is never
-restored.
-
-```
- ? WHY THIS MATTERS
-   You did not change the verdict. You took a backup.
-
-   An attestation is a claim about ONE recovery point, not a property
-   of the workload. There is now a newer point and nothing has opened
-   it, so the proof from Chapter 1 does not cover it. Proof does not
-   accumulate.
-
-   The distance between what an organization believes it can recover
-   and what it can prove is the RESILIENCE GAP. This workload's gap
-   just appeared in one line.
-```
+An attestation is a claim about one recovery point, not about the workload.
+Your backup made a newer point that nothing has opened, so the proof from
+Chapter 1 does not cover it. The distance between what an organization
+believes it can recover and what it can prove is called the resilience gap.
 
 ### Scan it
 
@@ -1173,32 +885,20 @@ op threatscan infra/workloads
                     THREATS DETECTED: malware was found in this recovery
                     point. Do not restore from it. Repair the source, then
                     take a new backup.
- ✓ THIS IS EXPECTED  THREATS FOUND and a non-zero exit. The scan found the compromise you planted, which is what it is for. Nothing is broken.
+ ✓ THIS IS EXPECTED  the output says THREATS FOUND and the command exits with an error. The scan found the compromise you planted, which is its job. Nothing is broken.
  ⏱ HOW LONG         about three minutes, sometimes up to nine. The job waits
                     for a scanning worker first; the progress line keeps
                     moving while it does.
- ✗ IF NOT           `Commvault: No suitable access node found` means no scanning worker was free: run the scan once more. If it stops and asks for scan_plan_id, set it in config/workshop.yaml and run it again.
-```
-
-```
- ? WHERE THE SCAN RAN, AND WHAT IT IS CALLED
-   That was THREAT SCAN, and it did not run on the VM. It opened the
-   backup copy in the recovery plane and read it there; production was
-   never touched.
-
-   A verdict about a recovery point can only honestly come from the copy
-   itself, and the copy lives where nothing from the VM can reach it.
+ ✗ IF NOT           `Commvault: No suitable access node found` means no scanning worker was free: run the scan once more. If it stops and names `scan_plan_id`, tell your facilitator, because that value is in the shared `config/workshop.yaml`.
 ```
 
 ### See it the way your security team sees it
 
-The command gave you a verdict. The console shows the same finding to whoever
-watches threats across the estate.
-
-```list
- 1   Open **Secure** in the navigation pane, then **Threat scan**.
- 2   Select your workload.
- 3   Stay on the **Overview** tab.
+```do
+1. In Command Center, open **Secure** in the navigation pane, then
+   **Threat scan**.
+2. Select your workload.
+3. Stay on the **Overview** tab.
 ```
 
 ```
@@ -1209,32 +909,18 @@ watches threats across the estate.
 ```
 
 ```
- ? HOW IT WORKS: WHAT THESE TWO NUMBERS DO AND DO NOT TELL YOU
-   The count is a window, not a ledger. Observed on 2026-08-18: it read 2
-   after this scan and 0 again 15 minutes later, once a clean scan had
-   run. Commvault does not document how the counts age out, so treat the
-   chart as a view of the latest scan, and do not build an alert on the
-   assumption that it accumulates.
-
-   Encryption reads 0, and that is correct. The `.locked` files are renamed,
-   not encrypted, and encryption detection reads file content for entropy
-   rather than reading filenames. The malware count is the only signal that
-   fired here, and it is the only one you may claim.
-
-   The other tabs are worth knowing. Anomalies covers file activity, MIME
-   type, extension and backup size deviations, measured against statistical
-   baselines. Threats lists the malware and encryption findings themselves.
-   Partner signals carries findings from integrated third-party security
-   tools.
+ ? HOW IT WORKS: WHY ENCRYPTION READS 0
+   The `.locked` files are renamed, not encrypted, and encryption
+   detection reads file content rather than file names. The malware
+   count is the only signal that fired. Both cards show only the latest
+   scan, so do not treat them as a history.
 ```
 
 ### Try to restore from it
 
-The scan says the point is unsafe, and its footer says `op remediate`: in a
-real incident you would repair and not restore from this point. Here you run
-the drill once anyway, to see the second control catch the same compromise
-from the inside. Its footer says `op remediate` too; Chapter 4 does that,
-after the gate.
+In a real incident you would repair the source rather than restore from this
+point. Here you run the drill once anyway, to see a second control catch the
+same compromise from inside the copy.
 
 ```bash
 op restore infra/workloads
@@ -1255,14 +941,14 @@ op restore infra/workloads
                     ...
                     RESTORE DRILL DID NOT PASS — the restored copy is not
                     clean — verify.sh said so inside it.
+ ✓ THIS IS EXPECTED  the drill reports FAIL and DID NOT PASS, and the command exits 3. The drill found the compromise inside the restored copy, which is its job. Press Enter when it asks, so that the restored copy is deleted.
  ⏱ HOW LONG         about three minutes to the verdict, then it waits for you.
  ✗ IF NOT           if the attestation says PASS, the backup ran before the incident finished: run `op incident`, then the loop again.
 ```
 
-The restore worked. The machine is up and healthy by every infrastructure
-measure. It is still not a recovery, because the data inside it is the
-compromise. Restored and clean are two different claims, and only a check
-that reads the data can tell them apart.
+The restored machine booted and is healthy by every infrastructure measure,
+but the data inside it is the compromise. Restored and clean are two
+different claims.
 
 ### The gate
 
@@ -1277,31 +963,15 @@ op gate infra/workloads
                                 item(s) found in the recovery point
 
                     HOLD  exit 1
+ ✓ THIS IS EXPECTED  HOLD with exit 1. The newest recovery point contains the compromise, so the gate is right to stop it.
 ```
-
-```
- ? WHY THIS MATTERS
-   Three checks, one finding, each from a different place. The scan read
-   the copy from the recovery plane. The drill restored it and read the
-   data from the inside. The gate turned both into a number a pipeline
-   acts on.
-
-   Each of them can also say "I could not tell", and that answer never
-   reads as a pass. A check that examined nothing must never report a
-   pass.
-```
-
-**Where you are now.** The backup job said Completed, the restore job said
-Completed and the restored VM was healthy. Every job was green, and the
-recovery point you would have restored from contains the compromise.
 
 ```
  ✦ WHAT YOU JUST PROVED
-   A green pipeline committed a compromise into an immutable vault.
-   The scan found it from the outside, the drill found it from the
-   inside, and the gate turned that into a HOLD.
-
-   Green is a job status, not a verdict about your data.
+   Every job was green, and the recovery point you would have restored
+   from contains the compromise. The scan found it from the outside,
+   the drill found it from the inside, and the gate turned that into a
+   HOLD.
 ```
 
 ## Chapter 4 · Choosing a Recovery Point
@@ -1318,13 +988,17 @@ recovery point you would have restored from contains the compromise.
  NEXT       Ask your team: under compromise, which recovery point would we
             restore from, and who decides? The silence is the finding.
  DONE WHEN  you have written down which of the four points you would
-            restore from, and why. Nothing to run: the decision is the
-            exercise, and it is the leg no tool times on its own.
+            restore from, and why. The commands in this chapter support
+            the decision. The decision itself is the exercise, and no tool
+            times it on its own.
 ```
 
 ### Put it back
 
-First, put your own workload back. This runs while you do the exercise.
+First, repair your own workload. `op remediate` removes exactly what the
+incident planted, which works only because the incident recorded what it
+changed. The command takes a couple of minutes, and you can read the next
+section while it runs.
 
 ```bash
 op remediate infra/workloads
@@ -1345,44 +1019,29 @@ op remediate infra/workloads
                     done. The VM has no inbound access, so this runs through
                     the Azure guest agent, which is a single blocking call
                     that reports once at the end rather than streaming.
- ✗ IF NOT           it raises rather than reporting success. Read what it raised before you touch anything, and do not run it twice blindly.
-```
-
-```
- ? WHAT REMEDIATE ACTUALLY DOES
-   It removes exactly what the incident planted, restores the two
-   files it stashed, and re-runs the attester. Surgical, because our
-   incident recorded what it changed. The discipline for incidents
-   that keep no manifest is exactly what comes next: choosing recovery
-   points on evidence.
+ ✗ IF NOT           the command stops with an error message instead of reporting success. Read the message before you change anything, and do not run the command again until you understand it. If you are unsure, ask your facilitator.
 ```
 
 ### The decision before recovery
 
-The repair above was a workshop shortcut: the incident recorded exactly what
-it changed, so it could be undone. In a real incident two decisions come
-first. Somebody declares the incident and authorizes recovery, and somebody
-chooses which recovery point to trust. Both are human decisions, and ResOps
-does not automate them away. It makes sure they are made on evidence.
+A real incident keeps no list of what changed, so recovery starts with human
+decisions. ResOps does not automate them; it makes sure they are made on
+evidence.
 
 ```list
- DECLARE            The incident is acknowledged and recovery is
-                    authorized. In your organization this happens in the
-                    incident tool you already use, not in a backup console.
- DECIDE             A recovery point is picked, and the reason is written
-                    down. The exercise below is this step.
+ DECLARE            Somebody acknowledges the incident and authorizes
+                    recovery, usually in your incident tool.
+ DECIDE             Somebody picks a recovery point and writes down why.
+                    The exercise below is this step.
  CONFIRM            After the drill, somebody signs the service back into
                     production. Chapter 5 ends there.
 ```
 
-Many organizations start their recovery clock at DECLARE, because that is the
-moment the business knows. The number this workshop measures starts earlier,
-at detection, and Chapter 5 explains why.
-
 ### Four recovery points, one decision
 
-Four recovery points, offline, with no cloud account and no token. They
-describe a scenario workload from `config/incident.yaml`, not your VM:
+The next command judges four recovery points offline, with no cloud account
+and no token. They belong to a sample workload defined in
+`config/incident.yaml`, not to your VM.
 
 ```bash
 resops gate config/incident.yaml
@@ -1400,7 +1059,7 @@ resops gate config/incident.yaml
                     ...
                     AGGREGATE  HOLD  exit 1
                       ↳ 3 of 4 blocked: C-32-hours-ago, B-6-days-ago, A-400-days-ago
- ✓ THIS IS EXPECTED  three of the four blocks HOLD, and the aggregate ends in HOLD and exit 1. Only one recovery point is safe to restore, and the gate says so.
+ ✓ THIS IS EXPECTED  three of the four recovery points HOLD, and the aggregate result is HOLD with exit 1. Only one recovery point is safe to restore, and the gate says so.
 ```
 
 The four points, side by side:
@@ -1420,42 +1079,24 @@ already abnormal. The compromise may be three days old, or nine.
 
 ```
  ? WHY THIS MATTERS
-
-   The gate promotes exactly one point, and it is the one squarely
-   inside the incident window. That is not a bug. It is a policy
-   written for outages answering a question about compromise.
-
-   A recovery point objective (RPO) target assumes the only cost of an
-   older point is lost data. Under compromise, the freshest point is
-   the most dangerous one.
-
-   Point A is the other lesson. The only point anyone can be certain
-   about costs 400 days of orders, and it is only certain because
-   nothing was verified between it and last week. That gap is not bad luck. It is the drill
-   nobody scheduled.
-```
-
-```
- ? THE NUMBER THIS PRODUCES
-   The clock starts when the compromise is detected and stops when a
-   restored copy is verified clean. The decision you just made is
-   inside it.
-
-   That is Mean Time to Clean Recovery (MTCR). Not time to recovery. Time to
-   clean recovery. The word "clean" is the point.
+   The gate promotes only D, which is inside the incident window. Its
+   recovery point objective (RPO) policy was written for outages, where
+   the only cost of an older point is lost data. Under compromise, the
+   freshest point is the most dangerous one. Point A is certain only
+   because nothing was verified between it and last week.
 ```
 
 ```
  ✦ WHAT YOU JUST DECIDED
    Recovery under compromise is a decision, made by a human, on
    evidence, against a clock. The tools narrow the choice; they do not
-   make it. MTCR measures how fast your organization can make it well.
+   make it.
 ```
 
-## Chapter 5 · Re-Proving Recovery · SOLO
+## Chapter 5 · Re-Proving Recovery
 
 ```
- STAGE      Scan, then Validate. Re-earned, not restored.
+ STAGE      Scan, then Validate. Both are re-earned, not restored.
  EXERCISE   Close the loop: take a clean point, scan it, drill it, and
             earn the green verdict back
  LEARN      What actually restores trust after an incident, and what
@@ -1471,10 +1112,9 @@ already abnormal. The compromise may be three days old, or nine.
             run the drill again, then gate.
 ```
 
-Your VM is clean, but the gate still holds: the newest recovery point
-still contains the compromise, and cleaning production changes nothing
-inside an immutable vault. Trust is re-earned the same way it was earned
-the first time.
+Your VM is clean, but the newest recovery point still contains the
+compromise, and cleaning production changes nothing in an immutable copy. You
+earn the verdict back with the same loop as Chapter 1.
 
 ### A clean point
 
@@ -1500,22 +1140,17 @@ op threatscan infra/workloads
  ✓ YOU SHOULD SEE   no threats found, and the tool saying what that does not prove. It exits 0 this time: nothing was found, and nothing being found is not a failure.
                     verdict: no threats found. A scan cannot prove a recovery
                     point is clean; the restore drill checks that.
- ✓ THIS IS EXPECTED  the words cannot prove. A scan that finds nothing does not prove the copy is clean, so the tool will not say it is. The drill that follows is what proves it.
+ ✓ THIS IS EXPECTED  the output says a scan cannot prove the recovery point is clean. A scan that finds nothing has not proven anything, so the tool does not claim it has. The drill that follows provides the proof.
  ⏱ HOW LONG         about three minutes, sometimes up to nine. The job waits
                     for a scanning worker first; the progress line keeps
                     moving while it does.
  ✗ IF NOT           `Commvault: No suitable access node found` means no scanning worker was free: run the scan once more.
 ```
 
+```do
+1. In Command Center, open **Secure**, then **Threat scan**.
+2. Select your workload again, and stay on the **Overview** tab.
 ```
- ? WHY THIS MATTERS
-   The scanner found nothing, and the tool refuses to call that clean.
-   Absence of evidence is never a pass. What clears the Scan rung is
-   the drill: something must OPEN the point and verify it from the
-   inside.
-```
-
-Open **Secure**, then **Threat scan**, and select your workload again.
 
 ```
  ✓ YOU SHOULD SEE   Malware back to 0, and Encryption unchanged
@@ -1524,16 +1159,9 @@ Open **Secure**, then **Threat scan**, and select your workload again.
  ✗ IF NOT           if Malware still reads 2, the scan above has not finished writing its result. Give it a minute and reload.
 ```
 
-```
- ? HOW IT WORKS: THE NUMBER WENT BACK TO ZERO
-   The chart reports the most recent scan, so a clean scan replaces a
-   dirty one and the estate view shows no trace of what you planted.
-
-   Two consequences worth carrying back. A dashboard that reads zero does
-   not mean nothing was ever found, and the recovery point that contained
-   the compromise still exists and is still restorable. The gate is what
-   remembers; the chart is not.
-```
+The console now shows no trace of the compromise, but the recovery point that
+contains it still exists and can still be restored. The gate remembers it;
+the chart does not.
 
 ### Prove it
 
@@ -1547,7 +1175,7 @@ op restore infra/workloads
                                  code intact, baseline present,
                                  3 customer records, no encryption
                                  markers, write/read verified
- ✓ THEN IT WAITS    the same Enter prompt as Chapter 1, before the restored copy is deleted.
+ ✓ THEN IT WAITS    the same Enter prompt as Chapter 1, before the restored copy is deleted. Press Enter to continue.
  ⏱ HOW LONG         about three minutes to the verdict, then it waits for you.
  ✗ IF NOT           a guest-agent-not-ready failure on a fresh restore is transient: run it again. Any FAIL: line is the attester doing its job, so read it before you retry.
 ```
@@ -1568,92 +1196,36 @@ op gate infra/workloads
 
 ### The number that just appeared
 
-Go back to the wall. The middle number has changed, and it is now measuring
-you.
+Return to the wall.
 
 ```
- ✓ ON THE WALL      Mean Time to Clean Recovery, now the average of the fixture's three hours and your own span. Your clock started when the scan in Chapter 3 found the compromise and stopped when the drill you just ran confirmed a restored copy was clean.
-                    Mean Time to Clean Recovery    <the average>
- ✗ IF NOT           if it still reads 3 hr, your span is missing, because one of its two ends is missing: the scan never recorded a detection, or the drill never wrote a clean attestation. Both are files, both under `evidence/`, and no number is the honest answer when an end is missing.
+ ✓ ON THE WALL      the Mean Time to Clean Recovery (MTCR) panel now shows the average of the sample's three hours and your own time. Your clock started when the scan in Chapter 3 found the compromise and stopped when the drill you just ran confirmed a restored copy was clean.
+                    Mean Time to Clean Recovery (MTCR)    <the average>
+ ✗ IF NOT           if it still reads 3 hr, your span is missing, because one of its two ends is missing: the scan never recorded a detection, or the drill never wrote a clean attestation. Both ends are recorded as files under `evidence/`. When either is missing, the wall shows no number for your workload rather than a wrong one.
 ```
 
-MTCR is Commvault's measure of how fast an organization returns to a verified
-known-good state after an attack. Not how fast it restores. Restoring fast
-without verifying is how you reinfect yourself, which you watched happen in
-Chapter 3 when a green backup captured your compromise.
-
-It has four legs, and all four are inside your number:
-
-```list
- DETECT             the scan found it. `op threatscan` wrote the moment
-                    down, because nothing else knew it: the anomaly record
-                    carries a count, not a time.
- DECIDE             a human picks a recovery point. Inside the span, but
-                    not timed on its own: only the two ends carry a
-                    timestamp. This is the leg from Chapter 4.
- RECOVER            the restore job runs.
- VERIFY             `verify.sh` runs inside the restored copy and returns
-                    a verdict. The clock stops here, not at the end of
-                    the restore.
-```
-
-Only the two ends are stamped, so the number cannot say how much of it was
-the decision. That leg is also why it is smaller than a real incident would
-be: here the decision was a guided exercise, not an afternoon of people
-arguing over a recovery point.
+MTCR measures how fast an organization returns to a verified known-good state
+after an attack, not how fast it restores. The clock starts at detection and
+stops at verification, so the time spent choosing a recovery point is inside
+it. Restoring fast without verifying is how a compromise comes back, as
+Chapter 3 showed.
 
 Your own number is on the `mtcr` line under the gate verdict, and in
-`evidence/<your-codename>/report.md`. The wall shows the average across every
-workload that has one.
-
-### Where the clock starts and stops
-
-Every measure of recovery time has to choose where its clock starts and stops,
-and organizations choose differently:
-
-```list
- at detection       This workshop. The scan's finding is stamped
-                    automatically, so the number is repeatable, and it
-                    includes the time spent deciding.
- at declaration     Common in incident reports: from the moment the
-                    incident is declared and recovery authorized.
- to sign-off        Some stop the clock when the service is approved back
-                    into production, rather than when the data is verified.
-```
-
-None of these is wrong. What matters is that everyone reading the number
-knows which one it is, which is why this one always says `threat detection to
-verified clean restore` beside it. When you bring MTCR to your own team, agree
-where the clock starts before agreeing a target for it.
-
-```
- ? WHY THE CLOCK STOPS AT VERIFY AND NOT AT RESTORE
-   A restore that finishes is a machine that booted. A restore that
-   verifies is data somebody opened and read. The gap between those
-   two is where reinfection lives, so the metric that matters has to
-   include the reading.
-
-   This is also why an absent attestation produces no MTCR rather
-   than a fast one. A workload nobody verified has no clean recovery
-   to have been mean time to.
-```
+`evidence/<your-codename>/report.md`. Organizations start and stop this clock
+in different places, so agree where it starts before you agree a target for
+it.
 
 ### Back into service
 
-The gate says PROMOTE. In production, one decision remains: somebody approves
-the service back into production. That is the CONFIRM step from Chapter 4, and
-in your organization it is the approval your pipeline already requires, a
-required reviewer or a change record. The gate supplies the evidence for that
-decision. It does not make it.
+The gate says PROMOTE, and one decision remains: somebody approves the
+service back into production. That is the CONFIRM step from Chapter 4. The
+gate supplies the evidence for that decision; it does not make it.
 
 ```
  ✦ WHAT YOU JUST CLOSED
-   Incident to trusted recovery, end to end: repair, clean point,
-   scan, drill, gate. The verdict came back green because you
-   re-proved it, not because time passed or a dashboard said so.
-
-   And you now have a number for how long that took, measured from
-   the detection rather than from the moment somebody started work.
+   You took the workload from incident to trusted recovery: repair,
+   clean point, scan, drill and gate. The verdict came back because you
+   re-proved it, and you now have a number for how long that took.
 ```
 
 ## Chapter 6 · Gating the Pipeline
@@ -1663,34 +1235,20 @@ decision. It does not make it.
             climbed by hand, read as an estate.
  EXERCISE   Run the gate across an estate, publish its numbers, and read
             the evidence and the exit code that make it a merge blocker
- LEARN      How a check survives contact with a real estate: the ratchet,
-            the control evidence, and who owns what
+ LEARN      How a check survives contact with a real estate: dated
+            tolerances, the control evidence, and who owns what
  RULE       A recoverability check belongs in the same place as your tests
             and your security scans, and it is built the same way.
  NEXT       Add one required check on one repository, with a dated tolerance
-            so it cannot block anyone on day one. Needs CI.
+            so it cannot block anyone on day one. This step needs CI.
  DONE WHEN  `resops gate config/estate.yaml; echo "exit $?"` prints exit 1,
             and you can say why a pipeline would stop on it.
 ```
 
-This chapter runs the same gate across an estate of six workloads, publishes
-its numbers, and shows why it drops into a pull request as a required check.
-One workload proving itself is a demonstration; an estate doing it on every
-change is the discipline.
-
-Your team has already done this three times, for three other classes of
-failure:
-
-```
- SHIFTED LEFT ALREADY              STILL ON THE RIGHT
- tests       -> CI gate            recoverability -> a ticket,
- security    -> scanner gate                        after an outage
- infra       -> plan gate
- lint        -> merge blocker
-```
-
-Each time it met the same resistance. Each time nobody argued after the first
-year. This workshop is about the fourth one.
+You already gate merges on tests, security scans and infrastructure plans.
+This chapter runs the same gate across an estate of six sample workloads and
+shows why it fits into a pull request as a fourth required check. Every
+command here runs offline.
 
 ### The estate
 
@@ -1703,20 +1261,17 @@ resops gate config/estate.yaml
                     AGGREGATE  HOLD  exit 1
                       ↳ 5 of 6 blocked: checkout-api, identity-svc, reporting-db, edge-cache,
                         legacy-batch
- ✓ THIS IS EXPECTED  five of six workloads blocked, and HOLD with exit 1. The estate is built from fixtures that fail on purpose, one per way a workload can fall short.
- ✗ IF NOT           you are not in the repository root. Run cd /workspaces/resopsv2-demo.
+ ✓ THIS IS EXPECTED  five of the six workloads are blocked, and the result is HOLD with exit 1. The estate is made of sample workloads that fail on purpose, each in a different way.
+ ✗ IF NOT           you are not in the repository root. Run `cd /workspaces/resops-lab`, then run the command again.
 ```
 
 **Compare `checkout-api` and `identity-svc`.** Both sit on the same rung for
-opposite reasons: one was tested and is contaminated, the other was never
-tested at all. The rung is identical for both, and the blocked stage is what
-tells them apart.
+opposite reasons: one was tested and is contaminated, and the other was never
+tested at all. The blocked stage is what tells them apart.
 
 ### Publish the numbers
 
-This is the text the wall is drawn from. Print it once, so the seam between a
-command and a dashboard is something you have seen rather than something you
-assume.
+This command prints the text the wall is built from.
 
 ```bash
 resops metrics config/estate.yaml
@@ -1730,30 +1285,10 @@ resops metrics config/estate.yaml
  ✗ IF NOT           "no run to publish" means you skipped the gate command above. This command formats the LAST run rather than taking its own, so there has to be one.
 ```
 
-It printed. It did not send anything anywhere, and that is the design: judge
-once, format many. The gate decides and writes the evidence down; this reads
-what was written and shapes it for a scraper; a third step delivers it. Three
-jobs, so a dashboard can never disagree with the bundle beside it.
-
-One run, two consumers. CI reads the exit code and decides whether to merge.
-Prometheus reads this text and draws the wall. Neither takes its own
-measurement.
-
-```
- ? HOW IT WORKS: WHY YOU NEVER HAD TO RUN THIS
-   Every `op` command that moved your workload finished by doing what
-   you just did by hand, and then sending it. That is why your row
-   appeared in Chapter 1 without you asking, and why it fell in
-   Chapter 3 when the backup succeeded.
-
-   Which answers a question worth asking out loud: what stops this
-   page drifting from the truth? There is no second way in. Nothing
-   can put a number on that wall that a run did not produce.
-
-   The two lines at the foot of every command are where you watch it
-   happen. `dashboard` says what the wall now reads, `next` says the
-   one command that would change it.
-```
+One gate run feeds two consumers. CI reads the exit code and decides whether
+to merge, and Prometheus reads this text and draws the wall. Every `op`
+command that changed your workload ran this same step and sent the result to
+the wall, so nothing can reach the wall unless a run produced it.
 
 ### The evidence underneath
 
@@ -1775,20 +1310,10 @@ cat evidence/estate/payments-api/report.md
 
 ![One crosswalk row, traced to the command that ran. Every link below the dashed one is verified by this run.](images/evidence-chain.svg)
 
-```
- ? WHY THE DISCLAIMER IS THE POINT
-   That last line is not a legal hedge, it is the same discipline the
-   Scan rung applies to a recovery point. A crosswalk maps our
-   evidence onto a regime's language. It does not audit you, and a
-   tool that claimed otherwise would be doing exactly what a backup
-   dashboard does when it reports green.
-
-   What it IS good for: whoever answers for your organization's regime
-   gets to point at a command your CI already runs, instead of a
-   spreadsheet somebody maintains by hand. Three regimes ship here as
-   examples. A pack is a small YAML file, so adding the one you answer
-   to is a data change, not an engineering project.
-```
+The crosswalk maps the evidence onto each regime's language. It does not
+audit you, which is what the disclaimer says. Its value is that your
+compliance team can point at a command CI already runs instead of a
+spreadsheet.
 
 ### The merge blocker
 
@@ -1800,62 +1325,43 @@ resops gate config/estate.yaml; echo "exit $?"
  ✓ YOU SHOULD SEE   the verdict, and then the number a pipeline reads
                     AGGREGATE  HOLD  exit 1
                     exit 1
- ✓ THIS IS EXPECTED  HOLD and exit 1. A non-zero exit is how a pipeline knows to block the merge, so here it is the result you want.
- ✗ IF NOT           nothing to fix. A required check is a command that exits non-zero, and that is all this is. Wire it into your own pipeline exactly as you wired the others.
+ ✓ THIS IS EXPECTED  the result is HOLD with exit 1. A pipeline blocks a merge when a check exits with a non-zero code, so this is the result you want.
+ ✗ IF NOT           if the last line is not `exit 1`, check that you copied the whole command, including `; echo "exit $?"`, and run it again from the repository root.
 ```
 
 ```
- ? HOW IT WORKS: WHY CI CAN TRUST THIS
-   The gate is a pure function: read the facts, apply the tier's
-   policy from tiers.yaml, exit 0 or 1. No clock games, no retries, no
-   state of its own. That is the entire integration surface, and it
-   is why wiring it in takes so little: CI already speaks exit codes
-   fluently.
-```
-
-```
- ? THE OBJECTION THIS ANSWERS
-   Point this at a real estate and almost everything HOLDs on day one.
-   Correctly. But then nobody can ship, so the check gets switched
-   off.
-
-   So a workload can declare a DATED tolerance:
+ ? HOW IT WORKS: DATED TOLERANCES
+   On a real estate almost everything HOLDs on day one, and a check that
+   blocks everyone gets switched off. So a workload can declare a dated
+   tolerance:
 
        enforce_from: 2027-01-01
        tolerance_reason: "backup policy rebuild in flight"
 
-   It still HOLDs, on screen and in the report. Only the aggregate
-   stops counting it, and only until that date. A DATE, not a flag; a
-   flag is permanent the moment somebody forgets it. And
-   resops_tolerated publishes how many you have, so it is a number
-   that has to go down.
+   The workload still HOLDs on screen and in the report, but the
+   aggregate stops counting it until that date. The resops_tolerated
+   metric publishes how many tolerances you have.
 ```
 
-**Who owns what.** This is the conversation the gate starts back at your desk.
+**Who owns what** when you adopt this:
 
 ```list
  verify.sh     The app team, because only they know what "good" means for
                their service.
- the drill     Platform. It is infrastructure.
- the gate      CI. It is a required check like any other.
- tiers.yaml    Platform and risk together. It is policy.
-```
-
-```
- ? WILL THIS WAKE SOMEONE AT 3AM?
-   No. Recoverability drift is not an incident. It fails a pull request
-   and waits for office hours.
+ the drill     The platform team, because it is infrastructure.
+ the gate      CI, because it is a required check like any other.
+ tiers.yaml    The platform and risk teams together, because it is policy.
 ```
 
 ```
  ✦ WHAT YOU JUST WIRED
-   The fourth gate, shaped exactly like the other three: a required
-   check, an honest number, evidence somebody outside engineering can
-   read, and a ratchet that lets an estate adopt it without blocking
+   You added a fourth gate, built like the other three: a required check, an
+   honest number, evidence somebody outside engineering can read, and
+   a dated tolerance that lets an estate adopt it without blocking
    releases.
 ```
 
-## Chapter 7 · Cleaning Up · SOLO
+## Chapter 7 · Cleaning Up
 
 ```
  STAGE      None. The ladder goes away with the workload, which is the
@@ -1866,19 +1372,14 @@ resops gate config/estate.yaml; echo "exit $?"
  RULE       A drill you cannot afford to run twice is a drill you will
             run once.
  NEXT       Price one drill for a workload you own: the compute, the
-            storage, the minutes. This week.
+            storage, the minutes. Do it this week.
  DONE WHEN  the resource count for your group is 0, terraform state is
             empty, and your row has left the dashboard. All three, because
             teardown reporting success is the claim, not the proof.
 ```
 
-Everything you built is real, and it bills until it is gone: a VM, a disk,
-a storage account, a virtual network, and a protected workload on a backup
-platform.
-
-The teardown command reports its own success, so this chapter also verifies
-that report independently, which is the habit the whole workshop has been
-about.
+Everything you built bills until it is gone. Teardown removes it, and then
+you verify the result yourself rather than trusting the report.
 
 ### Retire the workload
 
@@ -1892,78 +1393,34 @@ PYTHONUNBUFFERED=1 op teardown infra/workloads
                     swept GXMD snapshot: <name>
                     Destroy complete!
                     removed auto-created NetworkWatcher in <region>
+ ✓ THIS IS EXPECTED  HTTP 202 (pending admin approval). The platform accepted the delete and queued it for an administrator, because it protects backed-up resources from deletion. It is not a failure.
  ✓ ON THE WALL      your row disappears. The estate is back to the six services it had when you opened it in Setup.
  ⏱ HOW LONG         about four minutes
  ✗ IF NOT           a stall almost always means something still holds a lock on the resource group. If it ends with `teardown stopped: terraform destroy exited`, your row stays on the wall on purpose, because the VM may still exist and bill. Either way, read the Terraform error, then run it again: teardown checks whether each resource exists before deleting it, so running it twice is safe.
 ```
 
-Your row had to be **told** to go. Nothing on that wall expires, notices, or
-checks back. Until teardown said so, it read VALIDATED, PROMOTE, recovered in
-minutes, for a machine that had already stopped existing.
+Your row disappeared only because teardown removed it. Nothing on a dashboard
+expires on its own, so something has to be responsible for removing entries
+when the things they describe stop existing.
 
-That is not a quirk of this stack. It is a common way dashboards go stale,
-and this repository has met the vendor's version of it: three VMs deleted from
-Azure still reporting Protected. A dashboard is only as accurate as the thing
-publishing to it, which is why the command that removed the workload also
-removed its row.
-
-The same holds for any dashboard you rely on: it stays accurate only if
-something is responsible for removing entries when the things they describe
-stop existing.
-
-```
- ? HOW IT WORKS: WHAT A TEARDOWN HAS TO SWEEP
-   terraform destroy removes what Terraform created, and that is not
-   everything that exists. Your backup platform left snapshots behind,
-   and they block the resource group from deleting. Azure created a
-   network watcher nobody asked for, in a resource group of its own,
-   so destroy leaves it behind. Neither appears where you would look
-   for it.
-
-   This is the ordinary shape of cloud infrastructure: the thing that
-   created a resource is not always the thing that can remove it.
-   Teardown sweeps the snapshots first, hands over to Terraform, then
-   removes the watcher.
-```
-
-```
- ? WHY THE BACKUP PLATFORM REFUSES TO DELETE THE GROUP
-   HTTP 202 is not a failure. The platform accepted your request and
-   queued it for an administrator. The group disappears from listings,
-   which reads exactly like success, and if nobody approves it, it
-   comes back.
-
-   That is correct behavior for a system whose entire job is to stop
-   protected things being destroyed. The same control that made your
-   recovery points immutable in the first place is the one standing in
-   your way now.
-
-   The practical consequence: your codename is spent. If you run this
-   lab again, pick a new one. Reusing it adopts the old group and
-   attaches it to a machine that no longer exists, and the failure
-   surfaces later at backup, reading like nothing at all.
-```
+Your codename is now spent. If you run this lab again, use a new one, because
+reusing it attaches the old VM group to a machine that no longer exists.
 
 ### Verify it is gone
 
-Teardown reported success. Verify it independently, because a teardown that
-reports success and leaves resources running is the expensive failure.
-
 ```bash
-RG=$(awk '/^  resource_group:/{print $2}' config/workshop.yaml | tr -d '"')
+RG="$TF_VAR_resource_group"
 az resource list --resource-group "$RG" --query "length(@)" -o tsv
 ```
 
 ```
- ✓ YOU SHOULD SEE   your resource group name echoed by nothing, and then a single number, and that number is zero
+ ✓ YOU SHOULD SEE   a single number, and it is zero. The first line sets a variable and prints nothing.
                     0
- ✗ IF NOT           a number above zero names what teardown missed: run az resource list --resource-group "$RG" -o table to see it, then run the teardown again. An error instead of a number means the login expired; sign in again with the block from Setup.
+ ✗ IF NOT           a number above zero means teardown missed something. Run `az resource list --resource-group "$RG" -o table` to see what is left, then run the teardown again. An error instead of a number means the login expired or this terminal has not loaded `.env`. Open a new terminal, sign in again with the block from Setup, and run this step again.
 ```
 
-The scope matters. Everyone in this workshop shares one subscription, so a
-count taken across it would include every other participant's resources and
-would never reach zero. Your credential is scoped to one resource group, and
-that group is the only thing you are responsible for emptying.
+The count covers only your resource group, because other participants share
+the subscription.
 
 ```bash
 terraform -chdir=infra/workloads state list | wc -l
@@ -1972,26 +1429,14 @@ terraform -chdir=infra/workloads state list | wc -l
 ```
  ✓ YOU SHOULD SEE   zero resources left in state
                     0
-```
-
-```
- ? WHY YOU VERIFY INSTEAD OF TRUSTING
-   You have spent two hours on one idea: a green result is a claim,
-   and a claim is worth exactly what the check behind it is worth.
-   Teardown printed success. These two commands are the only things
-   that know whether it is true.
-
-   The same habit applies to a backup dashboard on Monday.
+ ✗ IF NOT           Terraform still tracks resources. Run the teardown command again, then repeat both checks.
 ```
 
 ```
  ✦ WHAT YOU JUST RETIRED
-   A lab that costs nothing to leave behind, retired and verified
-   empty by command rather than by report.
-
-   A drill only runs on a schedule if it is cheap to start and cheap
-   to end. Cost is what decides whether recovery testing becomes a
-   routine or stays an annual exercise.
+   You retired the lab and verified it empty by command rather than by
+   report. A drill runs on a schedule only if it is cheap to start and
+   cheap to end.
 ```
 
 ---
@@ -2005,176 +1450,22 @@ One workload produced four verdicts in two hours.
 ![One workload, two hours, four answers.](images/verdict-trail.svg)
 
 Every job in that trail reported success. The verdicts changed because of
-what had been **opened and read**, not because a job said Completed. That is
-assumption-based resilience becoming evidence-based, in four verdicts.
+what had been **opened and read**, not because a job said Completed.
 
 ### The fourth gate
 
-You already gate delivery: tests, security scans, lint, infrastructure
-plans. Today you ran the equivalent loop for recovery and gated it the
-same way.
-
 ![Both loops gated, and CI reads both as exit codes.](images/fourth-gate.svg)
 
-Both loops work the same way: a bar declared in a file, a check that runs
-on every change, an exit code CI can act on, and evidence that outlives
-the person who produced it. The first loop proves the service works, and
-the second proves it can be restored.
+You already gate delivery on tests, security scans and infrastructure plans.
+Today you gated recovery the same way: a bar declared in a file, a check that
+opens a recovery point, an exit code CI can act on, and evidence that outlasts
+the person who produced it.
 
-ResOps is this loop run as standard practice, the way SRE turned
-reliability into SLOs, error budgets and required checks. You ran the
-loop once today; the next step is running it on a schedule, on a
-workload you own.
+To start in your own estate, pick one tier-1 workload, declare its bar, and
+run the drill and the gate on a schedule as well as on every pull request.
+Give the rest of the estate dated tolerances, and let `resops_tolerated` show
+the number that has to go down. The same approach works with any backup
+platform that can open a recovery point.
 
-### The model you just walked
-
-ResOps is five domains. This workshop covered three of them hands-on and
-two through the files that define them.
-
-```list
-@governance Resilience governance        **Lightly.** The per-tier bar you read
-                    in `tiers.yaml`: a Service Resilience Indicator, declared
-                    and testable.
-@planning Recovery planning              **Lightly.** The estate view classifies
-                    six workloads by criticality and owner, which is where
-                    planning starts.
-@architecture Recovery architecture      **Fully.** The three planes: air gap,
-                    immutability, and drills run in isolation.
-@repetition Resilience assurance           **Fully.** The drill, and re-earning
-                    the verdict after an incident.
-@measuring Resilience measurements        **Fully.** MTCR and the resilience gap,
-                    published as a number somebody has to look at.
-```
-
-
-Capability answers "could we?". Outcomes answer "did we, and can we prove
-it?". ResOps measures outcomes.
-
-### What you used, and what it is called
-
-Cyber resilience is the ability to keep operating through an attack and to
-prove recovery afterward. Regulators now require that proof: the EU's
-Digital Operational Resilience Act (DORA) and its second network and
-information security directive (NIS2) both mandate demonstrated
-recoverability, not documented intent. The lab
-ran on Commvault Cloud; ResOps is Commvault's discipline for running
-recovery this way.
-
-Four ResOps ideas are below. These are the Commvault Cloud capabilities that
-carried them, so you can name them to a colleague or look them up later.
-
-```list
-@command-center Command Center    The web console. You opened it to discover
-                   a new Azure workload, and again to read the threat view.
-                   Every other operation you performed was an API call.
-@data-protection Protection plan   The policy: how often to back up, how long
-                   to keep it, and to which storage. A workload picks a plan.
-                   It does not configure recoverability itself.
-@locked Air Gap Protect            The immutable, air-gapped pool your
-                   recovery points landed in. Its credentials are held by the
-                   service and never by the workload, which is why a
-                   compromised machine could not reach the copies.
-@ransomware Threat Scan            Opens a recovery point in the recovery
-                   plane and reads it for malware, without touching
-                   production. It found the two planted files and honestly
-                   reported no encryption: the `.locked` files are renamed
-                   rather than encrypted, so a content scan finds nothing,
-                   and the marker check in `verify.sh` is what flagged them
-                   in the Chapter 3 drill. It runs on demand, on a plan's schedule, or when an
-                   anomaly trips it. Whichever it was, a scan that finds
-                   nothing has not proven the point clean, which is why the
-                   drill, not the scan, clears the Scan rung.
-```
-
-Everything else you ran was ours and is in this repository: the readiness
-ladder, the promotion gate, the restore drill, `verify.sh`, the evidence
-chain and the control crosswalk.
-
-### The five terms you earned
-
-```list
- impact tolerance   How much disruption the business will absorb before it
-                    stops being survivable. Set by the business, not by you.
-                    The recovery time objective (RTO) and RPO are yours.
-                    This one is not, and that is why
-                    asking for it starts a different conversation.
- SRI                Service Resilience Indicator. A declared, testable
-                    resilience bar per tier. `tiers.yaml` declares three:
-                    RPO, RTO and attestation freshness. You watched RPO and
-                    attestation freshness act today.
- MTCR               Mean Time to Clean Recovery. RTO measures how fast. RPO
-                    measures how recent. MTCR measures how trustworthy.
- resilience gap     The distance between what an organization believes it
-                    can recover and what it can prove.
- ResOps             Recovery run as an operating discipline, the way you
-                    already run delivery.
-```
-
-### What you can say
-
-Six sentences that survive a design review, because each one is a fact you
-watched happen rather than a claim you are repeating.
-
-```list
- 1   We gate on tests. We gate on scans. We do not gate on recoverability.
- 2   A green backup dashboard is a build artifact, not a run signal. It
-     proves the job ran, not that the data is recoverable.
- 3   Available is not trusted. The distance between them is the resilience
-     gap.
- 4   A check that examined nothing must never report a pass.
- 5   The number is time to CLEAN recovery. Not time to recovery.
- 6   This does not wake anyone at 3 a.m. It fails a pull request.
-```
-
-### Wiring the gate into your pipeline
-
-The gate is a required check, and it wires in like one. It runs on every
-pull request beside your tests and scans, and once on a schedule.
-Recoverability drifts without a code change: a backup fails overnight, an
-attestation ages past its bar. The exit code is the whole integration
-surface, which is why the workflow step is one line: run the command, let
-CI read the number.
-
-```
- pull request        tests ✓ · scans ✓ · plan ✓ · resops gate ✓ ──▸ merge
- schedule, daily     resops gate ──▸ resops metrics ──▸ the wall
-```
-
-Turning it on across a real estate works the same way coverage
-enforcement did. Almost everything HOLDs on day one, correctly, so each
-workload declares a dated tolerance and the aggregate stops counting it
-until that date. Start with one tier-1 workload rather than the estate,
-and let `resops_tolerated` publish the number that has to go down.
-
-Gate the workloads where the data is authoritative, the rebuild is slow,
-or somebody will one day ask for proof; skip stateless services and
-anything mid-migration, because a required check that fires for the wrong
-reason gets switched off. The discipline transfers to any backup platform
-that can open a recovery point: declare the bar, read the point, gate on
-the result, keep the evidence.
-
-### ResOps in the real world
-
-ResOps is an operating discipline, not a product: it unites security,
-infrastructure and operations teams around critical services, resilient
-design and continuous validation, so an organization can withstand
-disruption, recover within its impact tolerances, and prove it with
-evidence. You ran every part of that sentence today: the three planes
-were the resilient design, the drill was the continuous validation, the
-tiers were the recovery bars an impact tolerance is argued against, and
-the evidence chain was the proof.
-
-The discipline exists because the real world keeps demonstrating the
-need for it. Recovery plans that were never exercised fail under real
-conditions, restored systems come back running but not yet trusted, and
-regulators from DORA to NIS2 now ask for demonstrated recoverability
-rather than documented intent. Traditional approaches prioritize
-capability, tools in place and policies written; ResOps prioritizes
-outcomes, services restored within tolerance, clean, with evidence. The
-distance between the two is the resilience gap, and it closes one
-measured workload at a time.
-
-```
- From assumption-based resilience
-   to evidence-based, measurable, predictable recoverability.
-```
+Finally, look again at the three questions you answered in Setup, and
+compare your answers with what you have now seen.

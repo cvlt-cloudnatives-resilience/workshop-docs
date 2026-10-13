@@ -55,8 +55,9 @@ intro prose, blockquote          the blockquote renders as the landing
    last chapter                  page's title and sidebar name
 ```
 
-Every chapter follows one fixed order: the five-row strip, lead prose,
-### sections carrying the steps and asides, ✦ checkpoint, pager.
+Every chapter follows one fixed order: the strip (five rows on the page,
+plus DONE WHEN, which renders at the foot), lead prose, ### sections
+carrying the steps and asides, ✦ checkpoint, pager.
 Predictability is the reader's second facilitator. In diagnostic
 rows the LABEL LINE is description and flows to the full content width;
 the indented continuation under a ✓ is quoted output and stays
@@ -117,7 +118,7 @@ parser, never hand-edit the HTML.
                    consolidation, and the summary a room inherits when the
                    chapter itself is not rendered
 ``` starting STAGE the chapter strip: UPPERCASE label, two+ spaces, text.
-                   Opens every chapter, five rows, always in this order:
+                   Opens every chapter, six rows, always in this order:
 
                      STAGE     which of the engine's own six stages this
                                chapter moves, in the words the tool prints
@@ -127,6 +128,17 @@ parser, never hand-edit the HTML.
                                apply afterwards. It must be true and
                                applicable, not merely quotable
                      NEXT      the one thing to do in their own estate
+                     DONE WHEN the command and verdict that show the
+                               chapter worked, and what the other verdict
+                               means. Authored here, but NOT shown in the
+                               strip: render.take_done_when lifts it out
+                               and renders it as the Checkpoint footer at
+                               the end of the chapter, with a "Mark done"
+                               tick. The strip on the page stays five rows.
+                               A chapter without it renders no footer.
+                               The parser checks only that the first label
+                               is STAGE; it does not check row count or
+                               order, so keep them as listed
 
                    THE PARSER IDENTIFIES THIS BLOCK BY ITS FIRST LABEL. It
                    used to be DO; STAGE was added above it on 2026-08-20,
