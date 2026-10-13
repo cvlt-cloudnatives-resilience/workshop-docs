@@ -159,18 +159,20 @@ def render_diag(rows):
     parts = ['<aside class="diag" role="note">']
     for row in rows:
         cls = DIAG_CLASS[row["glyph"]]
+        if row["label"] == "THIS IS EXPECTED":
+            cls = "expect"
         chunks = []
-        if row["text"]:
+        text = row["text"]
+        if row["cont"] and row["glyph"] != "✓":
+            # guidance continues its sentence; only ✓ quotes output below
+            text = " ".join([text] + [l.strip() for l in row["cont"]
+                                      if l.strip()]).strip()
+        if text:
             chunks.append(
-                f'<p class="diag-text">{verdicts(inline(row["text"]))}</p>')
-        if row["cont"]:
-            if row["glyph"] == "✓":
-                quoted = "\n".join(row["cont"])
-                chunks.append(f"<pre>{verdicts(esc(quoted))}</pre>")
-            else:
-                flowed = " ".join(l.strip() for l in row["cont"] if l.strip())
-                chunks.append(
-                    f'<p class="diag-text">{verdicts(inline(flowed))}</p>')
+                f'<p class="diag-text">{verdicts(inline(text))}</p>')
+        if row["cont"] and row["glyph"] == "✓":
+            quoted = "\n".join(row["cont"])
+            chunks.append(f"<pre>{verdicts(esc(quoted))}</pre>")
         content = "".join(chunks)
         tag = ('<span class="diag-tag">output, do not type</span>'
                if row["glyph"] == "✓" and row["cont"] else "")

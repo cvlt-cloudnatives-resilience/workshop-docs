@@ -151,6 +151,8 @@
 .diag-yes .diag-label { color: var(--yes); }
 .diag-no .diag-label { color: var(--no); }
 .diag-clock .diag-label { color: var(--clock); }
+.diag-expect { border-left-color: var(--accent); background: var(--accent-soft); }
+.diag-expect .diag-label { color: var(--accent); }
 .diag-mark { margin-right: 7px; }
 .diag-row pre { margin-top: 8px; overflow-x: auto; line-height: 1.55;
   color: var(--ink); background: var(--out-bg); padding: 8px 12px;

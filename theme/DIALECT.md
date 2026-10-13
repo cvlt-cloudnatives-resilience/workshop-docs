@@ -105,6 +105,10 @@ parser, never hand-edit the HTML.
                    engine prints them. Getting any of this wrong is a
                    build error with the line number, never a silently
                    wrong page
+✓ THIS IS EXPECTED a ✓ row with this exact label renders in Crocus, not
+                   green. Use it wherever the correct result reads like a
+                   failure (FAIL, HOLD, exit 1, skipped), so nobody tries
+                   to fix a step that worked
 ``` starting ?     a quiet aside (why this matters, HOW IT WORKS).
                    title on the first line, prose and indented
                    pre-chunks after

@@ -236,6 +236,15 @@ mv .env.example .env
 3. Save the file.
 ```
 
+```
+ ✓ YOU SHOULD SEE   every line filled in, with no empty value after an `=`. The secret keeps its single quotes.
+                    ARM_CLIENT_ID=<...>
+                    ARM_CLIENT_SECRET='<...>'
+                    ARM_TENANT_ID=<...>
+                    CV_ACCESS_TOKEN=<...>
+                    CV_REFRESH_TOKEN=<...>
+```
+
 ### Fill in workshop.yaml
 
 Your credentials file lists the three values under **Your three FILL fields
@@ -288,6 +297,7 @@ op validate infra/workloads
                     PASS  config/workshop.yaml — no placeholder values
                     PASS  az logged in, correct subscription
                     validate PASS — safe to climb and teardown
+ ✓ THIS IS EXPECTED  IAM reports skipped. Your credential cannot read at subscription level, so the check cannot run. Skipped is not a failure, and there is nothing to fix.
  ⏱ HOW LONG         about twenty seconds
  ✗ IF NOT           the FAIL line names the field. `has N unfilled field(s)` lists every one it found by name: you have not finished `config/workshop.yaml`. `az not logged in` means the login above did not take, usually a secret pasted without its quotes.
 ```
@@ -978,6 +988,7 @@ op incident infra/workloads
                       inert, no real encryption
                     planted: 2 EICAR files, 14 .locked files, 1 note
                     BASELINE marker still present: yes
+ ✓ THIS IS EXPECTED  this command plants a compromise on purpose. The files are inert test patterns, not malware. Do not clean them up: the next steps depend on them.
  ⏱ HOW LONG         up to a couple of minutes, with no output until it is
                     done. The VM has no inbound access, so this runs through
                     the Azure guest agent, which is a single blocking call
@@ -1002,6 +1013,7 @@ op backup infra/workloads
  ✓ YOU SHOULD SEE   the same clean, green result you got the first time, under a new job id
                     backup job 8210692 on group 12345…
                     backup Completed
+ ✓ THIS IS EXPECTED  the band on the wall falls two rungs even though the backup succeeded. That drop is the point of this step, not an error.
  ✓ ON THE WALL      your band steps down two rungs, from VALIDATED to RECOVERABLE. A job that succeeded moved you backwards, because it made a recovery point nothing has verified.
  ⏱ HOW LONG         about two minutes
  ✗ IF NOT           if it sits on "Waiting", it is queued for a media agent: the shared worker that moves the data. Waiting for one is normal and not a failure. DO NOT KILL IT.
@@ -1045,6 +1057,7 @@ op gate infra/workloads
                     ✗ Scan      attestation does not cover the newest recovery point — verified <n> min before it was taken; re-run the drill
 
                     HOLD  exit 1
+ ✓ THIS IS EXPECTED  a ✗ on the Scan line, HOLD, and exit 1. This is the correct verdict for a recovery point nobody has verified. Do not re-run the drill to fix it; the next steps explain why.
 ```
 
 ![The attestation covers recovery point 1, and nothing after it.](images/proof-timeline.svg)
@@ -1081,6 +1094,7 @@ op threatscan infra/workloads
                     THREATS DETECTED — the scan ran and this recovery
                     point is NOT safe to restore from. The scan did its
                     job; the backup is the problem.
+ ✓ THIS IS EXPECTED  THREATS FOUND and a non-zero exit. The scan found the compromise you planted, which is what it is for. Nothing is broken.
  ⏱ HOW LONG         about three minutes, and up to six. The job id prints
                     straight away, then the client polls every 20
                     seconds until the scan finishes. Silence in between is
@@ -1222,6 +1236,7 @@ resops gate config/incident.yaml
                     ...
                     AGGREGATE  HOLD  exit 1
                       ↳ 3 of 4 blocked: C-32-hours-ago, B-6-days-ago, A-400-days-ago
+ ✓ THIS IS EXPECTED  three of the four blocks HOLD, and the aggregate ends in HOLD and exit 1. Only one recovery point is safe to restore, and the gate says so.
 ```
 
 The four points, side by side:
@@ -1322,6 +1337,7 @@ op threatscan infra/workloads
                     verdict: no threat recorded for this workload - which
                     is NOT the same as clean, and does not clear the Scan
                     rung on its own
+ ✓ THIS IS EXPECTED  the words NOT the same as clean. A scan that finds nothing does not prove the copy is clean, so the tool will not say it is. The drill that follows is what proves it.
  ⏱ HOW LONG         about three minutes, and up to six. The job id prints
                     straight away, then the client polls every 20
                     seconds until the scan finishes. Silence in between is
@@ -1492,6 +1508,7 @@ resops gate config/estate.yaml
                     AGGREGATE  HOLD  exit 1
                       ↳ 5 of 6 blocked: checkout-api, identity-svc, reporting-db, edge-cache,
                         legacy-batch
+ ✓ THIS IS EXPECTED  five of six workloads blocked, and HOLD with exit 1. The estate is built from fixtures that fail on purpose, one per way a workload can fall short.
  ✗ IF NOT           you are not in the repository root. Run cd /workspaces/resopsv2-demo.
 ```
 
@@ -1588,6 +1605,7 @@ resops gate config/estate.yaml; echo "exit $?"
  ✓ YOU SHOULD SEE   the verdict, and then the number a pipeline reads
                     AGGREGATE  HOLD  exit 1
                     exit 1
+ ✓ THIS IS EXPECTED  HOLD and exit 1. A non-zero exit is how a pipeline knows to block the merge, so here it is the result you want.
  ✗ IF NOT           nothing to fix. A required check is a command that exits non-zero, and that is all this is. Wire it into your own pipeline exactly as you wired the others.
 ```
 
