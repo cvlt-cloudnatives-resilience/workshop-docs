@@ -222,14 +222,19 @@ op validate infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   A list of PASS lines, ending with `validate PASS — safe to climb and teardown`.
-                    PASS  config/workshop.yaml and .env — no placeholder
-                          values
+ ✓ YOU SHOULD SEE   Six PASS lines, ending with `validate PASS — safe to climb and teardown`.
+                    op validate  ·  read-only · config, IAM, environment  ·  infra/workloads
+
+                    PASS  config/workshop.yaml and .env — no placeholder values
+                    PASS  IAM check skipped — this credential cannot read role
+                          assignments at subscription scope (…)
                     PASS  az logged in, correct subscription
+                    PASS  Commvault token valid
+                    PASS  hypervisor <n> (<hypervisor name>) reachable
                     PASS  terraform not yet applied in infra/workloads —
                           workload checks skipped
                     validate PASS — safe to climb and teardown
- ✓ THIS IS EXPECTED  Two PASS lines say skipped. The IAM check is skipped because your credential cannot read at subscription level. The workload checks are skipped because you have not run `terraform apply` yet. Skipped is not a failure, and there is nothing to fix.
+ ✓ THIS IS EXPECTED  Two PASS lines say skipped. The IAM check is skipped because your credential cannot read at subscription level, and the line ends with a command for the facilitator that you do not need to run. The workload checks are skipped because you have not run `terraform apply` yet. Skipped is not a failure, and there is nothing to fix.
  ⏱ HOW LONG         About ten seconds
  ✗ IF NOT           Read the FAIL line, because it names the problem. `FAIL  2 unfilled field(s): TF_VAR_codename in .env, TF_VAR_resource_group in .env` means those lines in `.env` are empty: fill them in, save the file, and run `op validate infra/workloads` again. `az not logged in` means the sign-in step did not work, so run it again. `Commvault token is dead` means your token pair no longer works: follow **Create a new Commvault token pair** below.
 ```
@@ -310,9 +315,12 @@ lab, and they cause most problems.
                                the file was deleted, it is tracked in git, so
                                `git checkout config/workshop.yaml` restores
                                it. There is nothing to fill in.
- no `workload` output          `terraform apply` has not run, or ran in a
-                               different directory. Run it from the repository
-                               root.
+ no `workload` output          Before the `terraform apply` in Chapter 1, this
+                               is expected from `op preflight` and
+                               `op status`, because your VM does not exist
+                               yet. After the apply, it means the apply
+                               failed or ran in a different directory: run
+                               it again from the repository root.
  not in /VM                    Discovery has not run since your VM was
                                created. Ask your facilitator to run it again.
                                Then check that your VM is listed in Command
@@ -370,14 +378,27 @@ lab, and they cause most problems.
                                reached the backup.
 ```
 
-**Before you investigate anything, run these three commands.** All three are
-read-only. `op validate` and `op preflight` work even when your Commvault
-token is dead and tell you so; `op status` needs a working token.
+**When something looks wrong, these three read-only checks help.** They
+change nothing, so you can run them at any time. `op preflight` and
+`op status` need your VM, so they only work after the `terraform apply` in
+Chapter 1.
 
-```
- op validate infra/workloads     Does your config parse, and are the ids present?
- op preflight infra/workloads    Can this machine reach Azure and the tenant?
- op status infra/workloads       What does the platform believe about your workload?
+```list
+ op validate infra/workloads    Checks your `.env`, your Azure sign-in, your
+                                Commvault token and the shared config. It
+                                should end with `validate PASS — safe to
+                                climb and teardown`.
+ op preflight infra/workloads   Checks that Azure and Commvault can see your
+                                VM. It should end with `preflight PASS — safe
+                                to climb`. Before Chapter 1's apply, it stops
+                                with `no workload output in infra/workloads —
+                                did you terraform apply?`, which is expected
+                                because there is no VM yet.
+ op status infra/workloads      Shows where your workload stands on the
+                                ladder. Before Chapter 1's apply, it stops
+                                with the same `no workload output` message,
+                                which is expected. It also needs a working
+                                Commvault token.
 ```
 
 ### Create a new Commvault token pair
