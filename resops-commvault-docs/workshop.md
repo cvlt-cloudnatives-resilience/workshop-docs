@@ -171,14 +171,14 @@ mv .env.example .env
 ```
 
 ```
- ✓ YOU SHOULD SEE   Every line in `.env` has a value after the `=`, and the secret is still inside its quotes.
+ ✓ YOU SHOULD SEE   Every line in `.env` has a value after the `=`, and the secret is still inside its quotes. Your codename is two lowercase words joined by a dash, such as `brave-otter`, and your resource group ends with it.
                     ARM_CLIENT_ID=<...>
                     ARM_CLIENT_SECRET="<...>"
                     ARM_TENANT_ID=<...>
                     CV_ACCESS_TOKEN=<...>
                     CV_REFRESH_TOKEN=<...>
                     TF_VAR_codename=<your-codename>
-                    TF_VAR_resource_group=rg-lab-<your-handle>
+                    TF_VAR_resource_group=rg-resops-u<n>-<your-codename>
 ```
 
 ### Load your credentials
@@ -234,8 +234,9 @@ op validate infra/workloads
  ✗ IF NOT           Read the FAIL line, because it names the problem. `FAIL  2 unfilled field(s): TF_VAR_codename in .env, TF_VAR_resource_group in .env` means those lines in `.env` are empty: fill them in, save the file, and run `op validate infra/workloads` again. `az not logged in` means the sign-in step did not work, so run it again. `Commvault token is dead` means your token pair no longer works: follow **Create a new Commvault token pair** below.
 ```
 
-Check your codename carefully. It names your VM, your Commvault VM group and
-your evidence files for the rest of the workshop.
+Check that your codename and resource group match your credentials file
+exactly. The codename names your VM, your Commvault VM group and your
+evidence files for the rest of the workshop.
 
 ### Open the wall
 
@@ -491,7 +492,7 @@ terraform -chdir=infra/workloads apply -auto-approve
                     Outputs:
                     workload = {
                       "location" = "eastus2"
-                      "resource_group" = "rg-lab-<your-handle>"
+                      "resource_group" = "rg-resops-u<n>-<your-codename>"
                       "restore_storage_account" = "<yourcodename>rst<...>"
                       "subnet_id" = "/subscriptions/<...>"
                       "vm_guid" = "<...>"
@@ -640,7 +641,7 @@ op restore infra/workloads
                                    → evidence/attestations/<your-codename>.json
  ✓ THEN IT WAITS    The drill pauses and asks you to press Enter before it deletes the restored copy. It is not stuck: the copy is running in Azure, and this is the only time it exists. Press Enter when you are ready. If you press Ctrl-C instead, the drill still deletes the copy so that it does not keep billing.
                     ✓ RECOVERED: <your-codename>-restore is running in
-                      Azure (RG rg-lab-<your-handle>).
+                      Azure (RG rg-resops-u<n>-<your-codename>).
                     Press Enter to tear it down…
  ⏱ HOW LONG         About three minutes to the verdict, then it waits for you. The teardown after Enter is about a minute.
  ✗ IF NOT           A failure saying the guest agent is not ready is temporary on a fresh restore, so run the command again. A `FAIL:` line means the check inside the copy found a problem: read it before you retry.
@@ -710,7 +711,7 @@ op status infra/workloads
                      ═══════════  UNDISCOVERED
 
                         ✓ discover  onboarded — in
-                                    'resops-<your-codename>-vg'
+                                    'resops-<your-codename>-<id>-vg'
                             ↳ like service discovery — is the workload
                               onboarded?
                     evidence   evidence/<your-codename>/bundle.json
@@ -875,7 +876,7 @@ op incident infra/workloads
 ```
  ✓ YOU SHOULD SEE   The command says what it is about to plant, then what it planted, then confirms that the known-good marker is still there.
                     incident: planting a detectable compromise in
-                    <your-codename> (rg-lab-<your-handle>)
+                    <your-codename> (rg-resops-u<n>-<your-codename>)
                       EICAR test pattern + high-entropy .locked files —
                       inert, no real encryption
                     planted: 2 EICAR files, 14 .locked files, 1 note
@@ -1000,7 +1001,7 @@ op restore infra/workloads
                       attestation: FAIL — attestation failed
                                    14 encrypted (.locked) files present
                     Restored, NOT clean: <your-codename>-restore is running
-                      in Azure (RG rg-lab-<your-handle>).
+                      in Azure (RG rg-resops-u<n>-<your-codename>).
                     Press Enter to tear it down…
                     ...
                     RESTORE DRILL DID NOT PASS — the restored copy is not
@@ -1458,7 +1459,7 @@ PYTHONUNBUFFERED=1 op teardown infra/workloads
                     CV group ##### delete → HTTP 202 (pending admin approval)
                     swept GXMD snapshot: <name>
                     VM <your-codename>-restore not found in
-                    rg-lab-<your-handle> — nothing to tear down.
+                    rg-resops-u<n>-<your-codename> — nothing to tear down.
                     Destroy complete!
  ✓ THIS IS EXPECTED  Three lines here are normal. The confirmation question protects you from deleting by accident. `HTTP 202 (pending admin approval)` means the platform accepted the delete and queued it for an administrator, because it protects backed-up resources from deletion. `not found … nothing to tear down` means the restore drill already deleted its copy.
  ✓ ON THE WALL      Your row disappears. The estate is back to the six services it had when you opened it in Setup.
@@ -1469,9 +1470,6 @@ PYTHONUNBUFFERED=1 op teardown infra/workloads
 Your row disappeared only because teardown removed it. Nothing on a dashboard
 expires on its own, so something has to be responsible for removing entries
 when the things they describe stop existing.
-
-Your codename is now spent. If you run this lab again, use a new one, because
-reusing it attaches the old VM group to a machine that no longer exists.
 
 ### Verify it is gone
 
