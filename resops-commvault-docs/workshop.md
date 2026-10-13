@@ -147,10 +147,10 @@ which op resops
 ```
 
 ```
- ✓ YOU SHOULD SEE   two paths, both inside the Codespace. That is the whole check.
+ ✓ YOU SHOULD SEE   The terminal prints two paths, both inside your Codespace.
                     /workspaces/resops-lab/bin/op
                     /workspaces/resops-lab/bin/resops
- ✗ IF NOT           `op: command not found` means `bin/` is not on your PATH, usually because setup did not finish. Run `bash .devcontainer/postCreate.sh`, then open a new terminal and try again. In a room, ask now rather than when the first command runs.
+ ✗ IF NOT           If it prints `op: command not found`, `bin/` is not on your PATH, usually because setup did not finish. Run `bash .devcontainer/postCreate.sh`, then open a new terminal and try again. In a room, ask now rather than when the first command runs.
 ```
 
 ### Create your .env
@@ -160,7 +160,7 @@ mv .env.example .env
 ```
 
 ```
- ✓ YOU SHOULD SEE   no output. The command prints nothing when it works.
+ ✓ YOU SHOULD SEE   The command prints nothing when it works.
 ```
 
 ```do
@@ -171,7 +171,7 @@ mv .env.example .env
 ```
 
 ```
- ✓ YOU SHOULD SEE   every line filled in, with no empty value after an `=`. The secret keeps its quotes.
+ ✓ YOU SHOULD SEE   Every line in `.env` has a value after the `=`, and the secret is still inside its quotes.
                     ARM_CLIENT_ID=<...>
                     ARM_CLIENT_SECRET="<...>"
                     ARM_TENANT_ID=<...>
@@ -193,33 +193,45 @@ set -a; . ./.env; set +a
 ```
 
 ```
- ✓ YOU SHOULD SEE   no output. The command prints nothing when it works.
- ✗ IF NOT           `No such file or directory` means you are not in the repository root, or `.env` was not created. Run `cd /workspaces/resops-lab`, then `ls .env`. Run this command again, or open a new terminal, after any edit to `.env`.
+ ✓ YOU SHOULD SEE   The command prints nothing when it works.
+ ✗ IF NOT           If it prints `No such file or directory`, you are not in the repository root, or `.env` does not exist. Run `cd /workspaces/resops-lab`, then `ls .env`. Run this command again, or open a new terminal, after any edit to `.env`.
 ```
 
-### Sign in, and check what you filled in
+### Sign in to Azure
 
-The `az` CLI does not read `.env`, so this block signs it in, then checks the
-values you entered.
+The `az` CLI does not read `.env`, so sign it in with the values you just
+loaded. Copy the whole command; it is one line.
 
 ```bash
-az login --service-principal \
-  -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" \
-  --tenant "$ARM_TENANT_ID" -o none
+az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID" -o none
+```
+
+```
+ ✓ YOU SHOULD SEE   The command prints nothing when the sign-in works.
+ ⏱ HOW LONG         A few seconds
+ ✗ IF NOT           `AADSTS7000215` (invalid client secret) means the secret in `.env` is wrong, or lost its quotes. `AADSTS700016` (application not found) means `ARM_CLIENT_ID` or `ARM_TENANT_ID` is wrong. If it says a value is missing or empty, this terminal has not loaded `.env`: run `set -a; . ./.env; set +a`, then sign in again.
+```
+
+### Check what you filled in
+
+`op validate` reads your `.env` and the shared config, and checks that every
+value is present and that Azure accepts your sign-in.
+
+```bash
 op validate infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   a list of PASS lines, ending with the line that says you are safe to climb.
+ ✓ YOU SHOULD SEE   A list of PASS lines, ending with `validate PASS — safe to climb and teardown`.
                     PASS  config/workshop.yaml and .env — no placeholder
                           values
                     PASS  az logged in, correct subscription
                     PASS  terraform not yet applied in infra/workloads —
                           workload checks skipped
                     validate PASS — safe to climb and teardown
- ✓ THIS IS EXPECTED  two PASS lines say skipped. The IAM check is skipped because your credential cannot read at subscription level. The workload checks are skipped because you have not run `terraform apply` yet. Skipped is not a failure, and there is nothing to fix.
- ⏱ HOW LONG         about ten seconds
- ✗ IF NOT           read the FAIL line, because it names the problem. `FAIL  2 unfilled field(s): TF_VAR_codename in .env, TF_VAR_resource_group in .env` means those lines in `.env` are empty. Fill them in, save the file, and run the block again. `az not logged in` means the sign-in above did not work. The usual cause is a secret pasted without its quotes.
+ ✓ THIS IS EXPECTED  Two PASS lines say skipped. The IAM check is skipped because your credential cannot read at subscription level. The workload checks are skipped because you have not run `terraform apply` yet. Skipped is not a failure, and there is nothing to fix.
+ ⏱ HOW LONG         About ten seconds
+ ✗ IF NOT           Read the FAIL line, because it names the problem. `FAIL  2 unfilled field(s): TF_VAR_codename in .env, TF_VAR_resource_group in .env` means those lines in `.env` are empty: fill them in, save the file, and run `op validate infra/workloads` again. `az not logged in` means the sign-in step did not work, so run it again. `Commvault token is dead` means your token pair no longer works: follow **Create a new Commvault token pair** below.
 ```
 
 Check your codename carefully. It names your VM, your Commvault VM group and
@@ -238,11 +250,11 @@ once. Open it now so that you see the starting state.
 ```
 
 ```
- ✓ ON THE WALL      six sample services and three numbers: how many cannot prove recovery, how long a clean recovery takes, and how often a check found something. The samples were loaded when your Codespace was built, so none of this is yours yet.
+ ✓ ON THE WALL      The wall shows six sample services and three numbers: how many cannot prove recovery, how long a clean recovery takes, and how often a check found something. The samples were loaded when your Codespace was built, so none of this is yours yet.
                     Cannot prove recovery                 5 of 6
                     Mean Time to Clean Recovery (MTCR)    3 hr
                     Checks that found a problem           1 of 3
- ✗ IF NOT           an empty dashboard means the sample data was not loaded. Run `bash .devcontainer/postCreate.sh` to load it again. If the sign-in page keeps returning, the browser cached an old session: open the port in a private window.
+ ✗ IF NOT           An empty dashboard means the sample data was not loaded. Run `bash .devcontainer/postCreate.sh` to load it again. If the sign-in page keeps returning, the browser cached an old session: open the port in a private window.
 ```
 
 Below the numbers is one band per service. At the default 90-day view, every
@@ -287,7 +299,7 @@ lab, and they cause most problems.
                                filled in `.env`, then open a new terminal or
                                run `set -a; . ./.env; set +a`, and run the
                                apply again.
- az not logged in              Run the sign-in block in Setup again. A secret
+ az not logged in              Run the command in Sign in to Azure again. A secret
                                pasted without its quotes is the usual cause.
  CV_ACCESS_TOKEN not set       `.env` is missing or was not saved. Run
                                `ls .env` from the repository root.
@@ -316,16 +328,13 @@ lab, and they cause most problems.
                                Nothing is wrong with your workload: run the
                                scan once more. If it fails the same way, tell
                                your facilitator.
- Commvault token is dead       Your Commvault token pair is spent and could
-                               not be renewed. The same problem prints as
-                               `Auth failed: Renewal returned HTTP 4xx`,
-                               sometimes with `invalid/expired` in the
-                               reason, and nothing publishes to the wall
-                               until you fix it. The usual cause is a pair
-                               that was shared or pasted into a second
-                               Codespace. Ask your facilitator for a fresh
-                               pair of your own and paste both values into
-                               `.env`.
+ Commvault token is dead       Your Commvault token pair no longer works.
+                               The same problem can print as `Auth failed:
+                               Renewal returned HTTP 4xx`, sometimes with
+                               `invalid/expired` in the reason, and nothing
+                               publishes to the wall until you fix it. Create
+                               a new pair: see **Create a new Commvault token
+                               pair** below.
  threatscan trigger refused    The scan plan id is missing or wrong. It is
                                `scan_plan_id` in the shared
                                `config/workshop.yaml`, so do not edit it. Tell
@@ -353,6 +362,27 @@ token is dead and tell you so; `op status` needs a working token.
  op validate infra/workloads     Does your config parse, and are the ids present?
  op preflight infra/workloads    Can this machine reach Azure and the tenant?
  op status infra/workloads       What does the platform believe about your workload?
+```
+
+### Create a new Commvault token pair
+
+Do this only when a command reports that your Commvault token is dead, or
+prints `Auth failed`. A token pair stops working when it expires, or when
+the same pair is used in two places, because each renewal replaces it.
+
+```do
+1. Sign in to Command Center.
+2. Open **Manage**, then **Account**, then **Access tokens**.
+3. Click **Add token**. Leave every setting at its default, and click
+   **Create token**.
+4. Copy the access token and the refresh token it shows.
+5. In `.env`, replace the values of `CV_ACCESS_TOKEN` and `CV_REFRESH_TOKEN`
+   with the new ones, and save the file.
+```
+
+```
+ ✓ YOU SHOULD SEE   `op preflight infra/workloads` (or `op validate infra/workloads` during Setup) reports PASS for the Commvault token. `op` reads `.env` directly, so you do not need to reload it.
+ ✗ IF NOT           If you cannot see **Access tokens**, or the new pair fails too, tell your facilitator. Do not reuse a pair from anyone else.
 ```
 
 ### Three questions, before anything runs
@@ -420,12 +450,28 @@ itself.
 
 ### Provision the service
 
+Initialize Terraform first. Your Codespace tries to do this when it is built,
+but it does not always succeed, and running it again is safe.
+
+```bash
+terraform -chdir=infra/workloads init -input=false
+```
+
+```
+ ✓ YOU SHOULD SEE   Terraform downloads its providers and ends with a success message.
+                    Terraform has been successfully initialized!
+ ⏱ HOW LONG         Under a minute
+ ✗ IF NOT           If it prints `chdir infra/workloads: no such file or directory`, you are not in the repository root: run `cd /workspaces/resops-lab` and try again. A network or download error is usually temporary, so run the command once more.
+```
+
+Now create your VM and its network.
+
 ```bash
 terraform -chdir=infra/workloads apply -auto-approve
 ```
 
 ```
- ✓ YOU SHOULD SEE   the apply finish, then one output object. Every later command reads these eight values instead of working out names for itself.
+ ✓ YOU SHOULD SEE   Terraform reports `Apply complete!` and prints one output, `workload`, with eight values. Every later command reads these values instead of working out names for itself.
                     Apply complete!
                     Outputs:
                     workload = {
@@ -438,8 +484,8 @@ terraform -chdir=infra/workloads apply -auto-approve
                       "vm_size" = "Standard_F1als_v7"
                       "vnet_name" = "resops-<your-codename>-vnet"
                     }
- ⏱ HOW LONG         about two minutes
- ✗ IF NOT           read the first error line. The usual causes are a quota limit and an expired login. Run `az account show` to check the login, then run the apply once more. If Terraform asks you to run init, run `terraform -chdir=infra/workloads init -input=false` once, then run the apply again.
+ ⏱ HOW LONG         About two minutes
+ ✗ IF NOT           Read the first error line. If Terraform says to run `terraform init`, or reports missing providers or an inconsistent lock file, run the init step above again, then the apply. `No codename or resource group` means this terminal has not loaded `.env`: run `set -a; . ./.env; set +a`, then the apply. For a quota or login error, run `az account show` to check the sign-in, then run the apply once more.
 ```
 
 ### Connect the platform
@@ -457,14 +503,14 @@ in Command Center.
 ```
 
 ```
- ✓ YOU SHOULD SEE   your VM listed, with the storage account your apply created beside it
+ ✓ YOU SHOULD SEE   Your VM is listed, along with the storage account and table storage that your apply created.
                     <your-codename>              Azure VM                 eastus2
                     <yourcodename>rst<...>       Azure storage account    eastus2
                     <yourcodename>rst<...>       Azure Table storage      eastus2
- ⏱ HOW LONG         about two minutes after your facilitator starts discovery.
+ ⏱ HOW LONG         About two minutes after your facilitator starts discovery.
                     The page does not refresh on its own, so reload it to see
                     new resources.
- ✗ IF NOT           if your VM is missing, discovery has not run since your
+ ✗ IF NOT           If your VM is missing, discovery has not run since your
                     `terraform apply` finished. Tell your facilitator, wait
                     for them to run it again, then refresh the Resources tab.
 ```
@@ -485,10 +531,10 @@ op preflight infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   five PASS lines, then the line that says you are safe to climb. The one that matters names your workload as discovered by the platform.
+ ✓ YOU SHOULD SEE   Five PASS lines, ending with `preflight PASS — safe to climb`. The most important one says the platform has discovered your workload.
                       PASS  <your-codename> discovered (cloud-native inventory)
                     preflight PASS — safe to climb
- ✗ IF NOT           each FAIL line names its own fix. If a line says `not discovered` even though your VM is in the Resources tab, the console and the API disagree. Tell your facilitator; do not try to run discovery yourself.
+ ✗ IF NOT           Each FAIL line names its own fix. If a line says `not discovered` even though your VM is in the Resources tab, the console and the API disagree. Tell your facilitator; do not try to run discovery yourself.
 ```
 
 ### The first recovery point
@@ -498,10 +544,10 @@ op protect infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   a VM group created, with your VM's id attached to it. A VM group is a named set of machines with one protection plan. Its id is what every later command addresses.
+ ✓ YOU SHOULD SEE   The command creates a VM group and adds your VM to it. A VM group is a named set of machines that share one protection plan, and every later command uses its id.
                     protected: group 12345  (<your-codename> by <vm-guid>,
                     IntelliSnap off)
- ✗ IF NOT           a failure naming discovery means the platform cannot see your VM yet. Ask your facilitator to run discovery again, confirm your VM in the Resources tab, then re-run this.
+ ✗ IF NOT           A failure that mentions discovery means the platform cannot see your VM yet. Ask your facilitator to run discovery again, confirm your VM in the Resources tab, then re-run this.
 ```
 
 ```bash
@@ -509,11 +555,11 @@ op backup infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   a job id and the group it ran on, then that job reaching its final state
+ ✓ YOU SHOULD SEE   The command prints the backup job id and its VM group, then waits until the job reports `Completed`.
                     backup job 8210418 on group 12345…
                     backup Completed
- ⏱ HOW LONG         about two minutes
- ✗ IF NOT           if it sits on "Waiting", it is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command.
+ ⏱ HOW LONG         About two minutes
+ ✗ IF NOT           If it sits on "Waiting", the job is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command.
 ```
 
 ```
@@ -535,12 +581,12 @@ op threatscan infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   a scan job, its progress, and a verdict. On a clean workload the verdict says nothing was found, and says what that does not prove.
+ ✓ YOU SHOULD SEE   The command starts a scan job, shows its progress, and prints a verdict. On a clean workload the verdict says no threats were found, and also says what that does not prove.
                     threatscan job <n>  (client <n>, scan plan <n>)...
                     threatscan attempt Completed
                     verdict: no threats found. A scan cannot prove a recovery
                     point is clean; the restore drill checks that.
- ⏱ HOW LONG         about three minutes, sometimes up to nine. The job waits
+ ⏱ HOW LONG         About three minutes, sometimes up to nine. The job waits
                     for a scanning worker first; the progress line keeps
                     moving while it does.
  ✗ IF NOT           `Commvault: No suitable access node found` means no scanning worker was free. Run the scan once more. If it stops and names `scan_plan_id`, tell your facilitator, because that value is in the shared `config/workshop.yaml`.
@@ -565,7 +611,7 @@ op restore infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the restore job complete, a restored VM validated in Azure, then a verdict block. The attestation line is the answer; the line under it is what the attester said inside the copy, and the line under that is where it was written down.
+ ✓ YOU SHOULD SEE   The restore job completes, the restored VM is checked in Azure, and the command prints a verdict block. The `attestation` line is the result. The lines under it show what the check found inside the copy and where the result was saved.
                     === DRILL VERDICT ===
                       job status : Completed
                       azure VM   : PASS — exists & running
@@ -574,12 +620,12 @@ op restore infra/workloads
                                    3 customer records, no encryption
                                    markers, write/read verified
                                    → evidence/attestations/<your-codename>.json
- ✓ THEN IT WAITS    the drill stops and asks you to press Enter before it deletes the restored copy. It is not stuck. The copy is running in Azure now, and this is the only time it exists. Press Enter when you are ready to continue.
+ ✓ THEN IT WAITS    The drill pauses and asks you to press Enter before it deletes the restored copy. It is not stuck: the copy is running in Azure, and this is the only time it exists. Press Enter when you are ready.
                     ✓ RECOVERED: <your-codename>-restore is running in
                       Azure (RG rg-lab-<your-handle>).
                     Press Enter to tear it down…
- ⏱ HOW LONG         about three minutes to the verdict, then it waits for you. The teardown after Enter is about a minute.
- ✗ IF NOT           a guest-agent-not-ready failure on a fresh restore is transient: run it again. Any FAIL: line is the attester doing its job, so read it before you retry.
+ ⏱ HOW LONG         About three minutes to the verdict, then it waits for you. The teardown after Enter is about a minute.
+ ✗ IF NOT           A failure saying the guest agent is not ready is temporary on a fresh restore, so run the command again. A `FAIL:` line means the check inside the copy found a problem: read it before you retry.
 ```
 
 ### Your row on the wall
@@ -587,10 +633,10 @@ op restore infra/workloads
 Return to the Grafana tab and wait for it to refresh.
 
 ```
- ✓ ON THE WALL      the headline counts you: its total goes from 6 to 7. Then find your codename in the table, **Every service, furthest from proven first**. A proven workload sorts last, so yours is at the BOTTOM, beside payments-api. Scroll inside the table if you cannot see it.
+ ✓ ON THE WALL      The headline now counts your workload: its total goes from 6 to 7. Find your codename in the table **Every service, furthest from proven first**. Proven workloads sort last, so yours is at the bottom, next to payments-api. Scroll inside the table if you cannot see it.
                     Cannot prove recovery          5 of 7
                     <your-codename>   VALIDATED    proven just now
- ✗ IF NOT           the page refreshes every ten seconds; give it one cycle. If the total still reads 6, your workload never published, and your terminal says why. `Auth failed: …` means your Commvault token is dead, so nothing could publish; see the token row in When something fails. Any other failure prints `(dashboard not updated: …)` with the reason, and it never stops the command it was attached to.
+ ✗ IF NOT           The page refreshes every ten seconds, so wait for one refresh. If the total still reads 6, your workload did not publish, and your terminal says why. `Auth failed: …` means your Commvault token is dead: follow **Create a new Commvault token pair** in Setup. Any other failure prints `(dashboard not updated: …)` with the reason, and it never stops the command it was attached to.
 ```
 
 You did not publish your row by hand. Every `op` command that changes your
@@ -633,7 +679,7 @@ op status infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the six dots and your state, then the ladder drawn out with a marker on the rung you are standing on, then a line per stage naming the fact that cleared it and the delivery practice it maps to. The discover line names your own group.
+ ✓ YOU SHOULD SEE   The command prints six dots and your state, then draws the ladder with a marker on your current rung. Below it, one line per stage names the fact that cleared that stage and the delivery practice it maps to. The discover line names your own group.
                     <your-codename>   workshop  resops-team
 
                     ●●●●●●  VALIDATED  ·  RPO 0.1h
@@ -652,7 +698,7 @@ op status infra/workloads
                     evidence   evidence/<your-codename>/bundle.json
                     dashboard  2 of 7 provable across the estate
                     next       op gate infra/workloads
- ✗ IF NOT           repeat the Chapter 1 steps that built this workload. In a room, tell the facilitator your codename rather than debugging it yourself.
+ ✗ IF NOT           Repeat the Chapter 1 steps that built this workload. In a room, tell the facilitator your codename rather than debugging it yourself.
 ```
 
 Each stage pairs a recovery fact with a practice you already run:
@@ -688,14 +734,14 @@ op gate infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   your name, the ladder, the evidence line, the trend, then the verdict and its exit code
+ ✓ YOU SHOULD SEE   The command prints your codename, the ladder, the evidence line and the trend, then the verdict and its exit code.
                     <your-codename>
                     ●●●●●●  VALIDATED  ·  RPO 0.1h
                     ✓ recovery proven — job 8210533
                     = held at VALIDATED over 3 runs
 
                     PROMOTE  exit 0
- ✗ IF NOT           if it says HOLD and names coverage, a backup ran after your last drill, possibly a scheduled one (see below). Run the drill again and re-gate, or keep reading: you meet that exact behavior on purpose in the next chapter.
+ ✗ IF NOT           If it says HOLD and names coverage, a backup ran after your last drill, possibly a scheduled one (see below). Run the drill again and re-gate, or keep reading: you meet that exact behavior on purpose in the next chapter.
 ```
 
 ```
@@ -726,7 +772,7 @@ cat config/tiers.yaml
 ```
 
 ```
- ✓ YOU SHOULD SEE   two tiers, each declaring three numbers: how much data loss it tolerates, how long recovery may take, and how recently something must have verified a recovery point
+ ✓ YOU SHOULD SEE   The file defines two tiers, each with three numbers: how much data loss it tolerates, how long recovery may take, and how recently something must have verified a recovery point
                     rpo_hours
                     rto_minutes
                     attestation_max_age_days
@@ -746,7 +792,7 @@ grep -A 80 'path: /opt/app/verify.sh' infra/modules/azure-vm/cloud-init.yaml
 ```
 
 ```
- ✓ YOU SHOULD SEE   about 70 lines of shell, carrying five checks. The last one WRITES a record and reads it back, and the script ends at exit 0. The start of the next file in the listing may show below that.
+ ✓ YOU SHOULD SEE   About 70 lines of shell script that run five checks. The last one WRITES a record and reads it back, and the script ends at exit 0. The start of the next file in the listing may show below that.
 ```
 
 Four of the five checks ask whether the right data is there. The fifth asks
@@ -809,7 +855,7 @@ op incident infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   what is about to be planted, then what was planted, then confirmation that the known-good marker survived
+ ✓ YOU SHOULD SEE   The command says what it is about to plant, then what it planted, then confirms that the known-good marker is still there.
                     incident: planting a detectable compromise in
                     <your-codename> (rg-lab-<your-handle>)
                       EICAR test pattern + high-entropy .locked files —
@@ -819,12 +865,12 @@ op incident infra/workloads
 
                     Compromise planted. The ladder cannot see it until a
                     backup captures it.
- ✓ THIS IS EXPECTED  this command plants a compromise on purpose. The files are inert test patterns, not malware. Do not clean them up: the next steps depend on them.
- ⏱ HOW LONG         up to a couple of minutes, with no output until it is
+ ✓ THIS IS EXPECTED  This command plants a compromise on purpose. The files are inert test patterns, not malware. Do not clean them up: the next steps depend on them.
+ ⏱ HOW LONG         Up to a couple of minutes, with no output until it is
                     done. The VM has no inbound access, so this runs through
                     the Azure guest agent, which is a single blocking call
                     that reports once at the end rather than streaming.
- ✗ IF NOT           check that the VM is running, because the guest agent needs about two minutes after boot. Retry once. If it fails again, stop and ask your facilitator.
+ ✗ IF NOT           Check that the VM is running, because the guest agent needs about two minutes after boot. Retry once. If it fails again, stop and ask your facilitator.
 ```
 
 EICAR is a standard test string that every malware scanner detects, so
@@ -839,13 +885,13 @@ op backup infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the same clean, green result you got the first time, under a new job id
+ ✓ YOU SHOULD SEE   The backup completes as it did the first time, with a new job id.
                     backup job <n> on group <n>…
                     backup Completed
- ✓ THIS IS EXPECTED  your band on the wall falls two rungs even though the backup succeeded. That drop is the point of this step, not an error.
- ✓ ON THE WALL      your band steps down two rungs, from VALIDATED to RECOVERABLE. A job that succeeded moved you backwards, because it made a recovery point nothing has verified.
- ⏱ HOW LONG         about two minutes
- ✗ IF NOT           if it sits on "Waiting", it is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command.
+ ✓ THIS IS EXPECTED  Your band on the wall falls two rungs even though the backup succeeded. That drop is the point of this step, not an error.
+ ✓ ON THE WALL      Your band steps down two rungs, from VALIDATED to RECOVERABLE. A job that succeeded moved you backwards, because it made a recovery point nothing has verified.
+ ⏱ HOW LONG         About two minutes
+ ✗ IF NOT           If it sits on "Waiting", the job is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command.
 ```
 
 ### Proof does not carry over
@@ -857,12 +903,12 @@ op status infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the ladder two rungs lower, stopped at Scan, with the reason on the Scan line
+ ✓ YOU SHOULD SEE   The ladder is two rungs lower and stops at Scan. The Scan line gives the reason.
                     ●●●●✗·  RECOVERABLE  ·  RPO 0.1h
                     ✗ Scan      attestation does not cover the newest recovery
                                 point — verified <n> min before it was taken;
                                 re-run the drill
- ✓ THIS IS EXPECTED  the Scan line shows ✗. That is the correct reading for a recovery point nobody has verified. Do not re-run the drill to fix it; the next steps explain why.
+ ✓ THIS IS EXPECTED  The Scan line shows ✗. That is the correct reading for a recovery point nobody has verified. Do not re-run the drill to fix it; the next steps explain why.
 ```
 
 ![The attestation covers recovery point 1, and nothing after it.](images/proof-timeline.svg)
@@ -879,14 +925,14 @@ op threatscan infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the verdict with what the scan found, then what it means for the recovery point. The command exits 1: a pipeline reading it stops here.
+ ✓ YOU SHOULD SEE   The verdict names what the scan found, then says what that means for the recovery point. The command exits 1: a pipeline reading it stops here.
                     verdict: THREATS FOUND - 2 malware item(s) found in the
                     recovery point
                     THREATS DETECTED: malware was found in this recovery
                     point. Do not restore from it. Repair the source, then
                     take a new backup.
- ✓ THIS IS EXPECTED  the output says THREATS FOUND and the command exits with an error. The scan found the compromise you planted, which is its job. Nothing is broken.
- ⏱ HOW LONG         about three minutes, sometimes up to nine. The job waits
+ ✓ THIS IS EXPECTED  The output says THREATS FOUND and the command exits with an error. The scan found the compromise you planted, which is its job. Nothing is broken.
+ ⏱ HOW LONG         About three minutes, sometimes up to nine. The job waits
                     for a scanning worker first; the progress line keeps
                     moving while it does.
  ✗ IF NOT           `Commvault: No suitable access node found` means no scanning worker was free: run the scan once more. If it stops and names `scan_plan_id`, tell your facilitator, because that value is in the shared `config/workshop.yaml`.
@@ -902,10 +948,10 @@ op threatscan infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   two cards, and a malware count matching the scan you just ran
+ ✓ YOU SHOULD SEE   The view shows two cards, and the malware count matches the scan you just ran.
                     Malware      2
                     Encryption   0
- ✗ IF NOT           if Malware reads 0, a later clean scan has replaced this one. The chart shows the most recent scan, not a history.
+ ✗ IF NOT           If Malware reads 0, a later clean scan has replaced this one. The chart shows the most recent scan, not a history.
 ```
 
 ```
@@ -927,7 +973,7 @@ op restore infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the restore complete and the copy boot, then verify.sh inside the copy refuse it. The command exits 3: restored, but not clean.
+ ✓ YOU SHOULD SEE   The restore completes and the copy boots, then `verify.sh` inside the copy rejects it. The command exits 3, which means restored but not clean.
                     FAIL: 14 encrypted (.locked) files present
 
                     === DRILL VERDICT ===
@@ -941,9 +987,9 @@ op restore infra/workloads
                     ...
                     RESTORE DRILL DID NOT PASS — the restored copy is not
                     clean — verify.sh said so inside it.
- ✓ THIS IS EXPECTED  the drill reports FAIL and DID NOT PASS, and the command exits 3. The drill found the compromise inside the restored copy, which is its job. Press Enter when it asks, so that the restored copy is deleted.
- ⏱ HOW LONG         about three minutes to the verdict, then it waits for you.
- ✗ IF NOT           if the attestation says PASS, the backup ran before the incident finished: run `op incident`, then the loop again.
+ ✓ THIS IS EXPECTED  The drill reports FAIL and DID NOT PASS, and the command exits 3. The drill found the compromise inside the restored copy, which is its job. Press Enter when it asks, so that the restored copy is deleted.
+ ⏱ HOW LONG         About three minutes to the verdict, then it waits for you.
+ ✗ IF NOT           If the attestation says PASS, the backup ran before the incident finished: run `op incident`, then the loop again.
 ```
 
 The restored machine booted and is healthy by every infrastructure measure,
@@ -1005,7 +1051,7 @@ op remediate infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the planted files removed, the stashed files restored, and the attester re-run and passing, then a line that says what the repair has not yet proven
+ ✓ YOU SHOULD SEE   The command removes the planted files, restores the stashed ones, and runs the check again, which passes. The last line says what the repair has not proven yet.
                         removed the planted artifacts; restored 2 file(s)
                         from the stash
                         locked_remaining=0
@@ -1015,11 +1061,11 @@ op remediate infra/workloads
 
                     Repaired in place. Not proven yet: a new backup, scan
                     and drill show whether the recovery point is clean.
- ⏱ HOW LONG         up to a couple of minutes, with no output until it is
+ ⏱ HOW LONG         Up to a couple of minutes, with no output until it is
                     done. The VM has no inbound access, so this runs through
                     the Azure guest agent, which is a single blocking call
                     that reports once at the end rather than streaming.
- ✗ IF NOT           the command stops with an error message instead of reporting success. Read the message before you change anything, and do not run the command again until you understand it. If you are unsure, ask your facilitator.
+ ✗ IF NOT           If the command stops with an error message instead of reporting success, read the message before you change anything, and do not run the command again until you understand it. If you are unsure, ask your facilitator.
 ```
 
 ### The decision before recovery
@@ -1048,7 +1094,7 @@ resops gate config/incident.yaml
 ```
 
 ```
- ✓ YOU SHOULD SEE   four blocks, one per recovery point, each opening with ▸ and its name. Read the verdict at the foot of each block, then the aggregate at the bottom. A verdict that holds names its reason on a ↳ line underneath; A fails three rules and prints three.
+ ✓ YOU SHOULD SEE   The output has four blocks, one per recovery point, each starting with ▸ and its name. Read the verdict at the foot of each block, then the aggregate at the bottom. A verdict that holds names its reason on a ↳ line underneath; A fails three rules and prints three.
                     Target: offline fixture — no cloud
 
                     ▸ D-7-hours-ago  prod  payments  (critical)
@@ -1059,7 +1105,7 @@ resops gate config/incident.yaml
                     ...
                     AGGREGATE  HOLD  exit 1
                       ↳ 3 of 4 blocked: C-32-hours-ago, B-6-days-ago, A-400-days-ago
- ✓ THIS IS EXPECTED  three of the four recovery points HOLD, and the aggregate result is HOLD with exit 1. Only one recovery point is safe to restore, and the gate says so.
+ ✓ THIS IS EXPECTED  Three of the four recovery points HOLD, and the aggregate result is HOLD with exit 1. Only one recovery point is safe to restore, and the gate says so.
 ```
 
 The four points, side by side:
@@ -1123,11 +1169,11 @@ op backup infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the same green result, from a VM that is now clean, under a third job id
+ ✓ YOU SHOULD SEE   The backup completes again, this time from a clean VM, with a third job id.
                     backup job 8211044 on group 12345…
                     backup Completed
- ⏱ HOW LONG         about two minutes
- ✗ IF NOT           if it sits on "Waiting", it is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command.
+ ⏱ HOW LONG         About two minutes
+ ✗ IF NOT           If it sits on "Waiting", the job is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command.
 ```
 
 ### Scan it
@@ -1137,11 +1183,11 @@ op threatscan infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   no threats found, and the tool saying what that does not prove. It exits 0 this time: nothing was found, and nothing being found is not a failure.
+ ✓ YOU SHOULD SEE   The scan finds no threats, and the output says what that does not prove. It exits 0 this time: nothing was found, and nothing being found is not a failure.
                     verdict: no threats found. A scan cannot prove a recovery
                     point is clean; the restore drill checks that.
- ✓ THIS IS EXPECTED  the output says a scan cannot prove the recovery point is clean. A scan that finds nothing has not proven anything, so the tool does not claim it has. The drill that follows provides the proof.
- ⏱ HOW LONG         about three minutes, sometimes up to nine. The job waits
+ ✓ THIS IS EXPECTED  The output says a scan cannot prove the recovery point is clean. A scan that finds nothing has not proven anything, so the tool does not claim it has. The drill that follows provides the proof.
+ ⏱ HOW LONG         About three minutes, sometimes up to nine. The job waits
                     for a scanning worker first; the progress line keeps
                     moving while it does.
  ✗ IF NOT           `Commvault: No suitable access node found` means no scanning worker was free: run the scan once more.
@@ -1156,7 +1202,7 @@ op threatscan infra/workloads
  ✓ YOU SHOULD SEE   Malware back to 0, and Encryption unchanged
                     Malware      0
                     Encryption   0
- ✗ IF NOT           if Malware still reads 2, the scan above has not finished writing its result. Give it a minute and reload.
+ ✗ IF NOT           If Malware still reads 2, the scan above has not finished writing its result. Give it a minute and reload.
 ```
 
 The console now shows no trace of the compromise, but the recovery point that
@@ -1170,14 +1216,14 @@ op restore infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the same verdict block as Chapter 1, read from inside a fresh copy of the clean point, and written to the same file. This one overwrites the dirty attestation from Chapter 3's drill.
+ ✓ YOU SHOULD SEE   The drill prints the same verdict block as in Chapter 1, read from inside a fresh copy of the clean recovery point and saved to the same file. This one overwrites the dirty attestation from Chapter 3's drill.
                     attestation: PASS — attested clean
                                  code intact, baseline present,
                                  3 customer records, no encryption
                                  markers, write/read verified
- ✓ THEN IT WAITS    the same Enter prompt as Chapter 1, before the restored copy is deleted. Press Enter to continue.
- ⏱ HOW LONG         about three minutes to the verdict, then it waits for you.
- ✗ IF NOT           a guest-agent-not-ready failure on a fresh restore is transient: run it again. Any FAIL: line is the attester doing its job, so read it before you retry.
+ ✓ THEN IT WAITS    The drill pauses at the same Enter prompt as in Chapter 1 before it deletes the restored copy. Press Enter to continue.
+ ⏱ HOW LONG         About three minutes to the verdict, then it waits for you.
+ ✗ IF NOT           A failure saying the guest agent is not ready is temporary on a fresh restore, so run the command again. A `FAIL:` line means the check inside the copy found a problem: read it before you retry.
 ```
 
 ```bash
@@ -1185,13 +1231,13 @@ op gate infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   the verdict back where it started, on new evidence rather than on time passing. The job id on the evidence line is the drill you just ran, not the one from Chapter 1. Under the verdict is your own Mean Time to Clean Recovery.
+ ✓ YOU SHOULD SEE   The verdict is back where it started, based on new evidence rather than on time passing. The job id on the evidence line is the drill you just ran, not the one from Chapter 1. Under the verdict is your own Mean Time to Clean Recovery.
                     ●●●●●●  VALIDATED
                     ✓ recovery proven — job 8211107
 
                     PROMOTE  exit 0
                     mtcr       <n> min · threat detection to verified clean restore
- ✗ IF NOT           if it says HOLD and names coverage, a backup ran after your drill: run the drill again, then re-gate.
+ ✗ IF NOT           If it says HOLD and names coverage, a backup ran after your drill: run the drill again, then re-gate.
 ```
 
 ### The number that just appeared
@@ -1199,9 +1245,9 @@ op gate infra/workloads
 Return to the wall.
 
 ```
- ✓ ON THE WALL      the Mean Time to Clean Recovery (MTCR) panel now shows the average of the sample's three hours and your own time. Your clock started when the scan in Chapter 3 found the compromise and stopped when the drill you just ran confirmed a restored copy was clean.
+ ✓ ON THE WALL      The Mean Time to Clean Recovery (MTCR) panel now shows the average of the sample's three hours and your own time. Your clock started when the scan in Chapter 3 found the compromise and stopped when the drill you just ran confirmed a restored copy was clean.
                     Mean Time to Clean Recovery (MTCR)    <the average>
- ✗ IF NOT           if it still reads 3 hr, your span is missing, because one of its two ends is missing: the scan never recorded a detection, or the drill never wrote a clean attestation. Both ends are recorded as files under `evidence/`. When either is missing, the wall shows no number for your workload rather than a wrong one.
+ ✗ IF NOT           If it still reads 3 hr, your span is missing, because one of its two ends is missing: the scan never recorded a detection, or the drill never wrote a clean attestation. Both ends are recorded as files under `evidence/`. When either is missing, the wall shows no number for your workload rather than a wrong one.
 ```
 
 MTCR measures how fast an organization returns to a verified known-good state
@@ -1257,12 +1303,12 @@ resops gate config/estate.yaml
 ```
 
 ```
- ✓ YOU SHOULD SEE   six workloads, five of them holding, and one exit code for the set
+ ✓ YOU SHOULD SEE   The gate checks six workloads, holds five of them, and returns one exit code for the whole set.
                     AGGREGATE  HOLD  exit 1
                       ↳ 5 of 6 blocked: checkout-api, identity-svc, reporting-db, edge-cache,
                         legacy-batch
- ✓ THIS IS EXPECTED  five of the six workloads are blocked, and the result is HOLD with exit 1. The estate is made of sample workloads that fail on purpose, each in a different way.
- ✗ IF NOT           you are not in the repository root. Run `cd /workspaces/resops-lab`, then run the command again.
+ ✓ THIS IS EXPECTED  Five of the six workloads are blocked, and the result is HOLD with exit 1. The estate is made of sample workloads that fail on purpose, each in a different way.
+ ✗ IF NOT           If it reports a missing file, you are not in the repository root. Run `cd /workspaces/resops-lab`, then run the command again.
 ```
 
 **Compare `checkout-api` and `identity-svc`.** Both sit on the same rung for
@@ -1282,7 +1328,7 @@ resops metrics config/estate.yaml
                     resops_rung{workload="payments-api",env="prod",...} 6
                     resops_mtcr_minutes{workload="payments-api"} 180.0
                     resops_verification_clean{workload="payments-api"} 1
- ✗ IF NOT           "no run to publish" means you skipped the gate command above. This command formats the LAST run rather than taking its own, so there has to be one.
+ ✗ IF NOT           `no run to publish` means you skipped the gate command above. This command formats the LAST run rather than taking its own, so there has to be one.
 ```
 
 One gate run feeds two consumers. CI reads the exit code and decides whether
@@ -1300,12 +1346,12 @@ cat evidence/estate/payments-api/report.md
 ```
 
 ```
- ✓ YOU SHOULD SEE   the run, its verdict, and a control crosswalk mapping each capability onto the regimes this repository ships as examples, with an honest disclaimer under it
+ ✓ YOU SHOULD SEE   The report shows the run and its verdict, then a table that maps each capability to the example compliance frameworks in this repository, with a disclaimer under it.
                     | Capability | dora | nist-800-53 | apra-cps230 |
                     | CAP-RESTORE-TESTED | Art. 11/12 | CP-4, CP-9(1) | scenario & business continuity testing |
                     Indicative mapping ... supports an internal resilience
                     programme, not a compliance attestation.
- ✗ IF NOT           "No such file" means the estate gate above has not run yet. It is what writes this file.
+ ✗ IF NOT           `No such file` means the estate gate above has not run yet. It is what writes this file.
 ```
 
 ![One crosswalk row, traced to the command that ran. Every link below the dashed one is verified by this run.](images/evidence-chain.svg)
@@ -1322,11 +1368,11 @@ resops gate config/estate.yaml; echo "exit $?"
 ```
 
 ```
- ✓ YOU SHOULD SEE   the verdict, and then the number a pipeline reads
+ ✓ YOU SHOULD SEE   The command prints the verdict, then the exit code that a pipeline reads.
                     AGGREGATE  HOLD  exit 1
                     exit 1
- ✓ THIS IS EXPECTED  the result is HOLD with exit 1. A pipeline blocks a merge when a check exits with a non-zero code, so this is the result you want.
- ✗ IF NOT           if the last line is not `exit 1`, check that you copied the whole command, including `; echo "exit $?"`, and run it again from the repository root.
+ ✓ THIS IS EXPECTED  The result is HOLD with exit 1. A pipeline blocks a merge when a check exits with a non-zero code, so this is the result you want.
+ ✗ IF NOT           If the last line is not `exit 1`, check that you copied the whole command, including `; echo "exit $?"`, and run it again from the repository root.
 ```
 
 ```
@@ -1388,15 +1434,15 @@ PYTHONUNBUFFERED=1 op teardown infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   four things happen in order: the backup platform's group is queued for deletion, leftover snapshots are swept, Terraform destroys the rest, and an auto-created network watcher is removed.
+ ✓ YOU SHOULD SEE   Four things happen in order: the backup platform's group is queued for deletion, leftover snapshots are swept, Terraform destroys the rest, and an auto-created network watcher is removed.
                     CV group ##### delete → HTTP 202 (pending admin approval)
                     swept GXMD snapshot: <name>
                     Destroy complete!
                     removed auto-created NetworkWatcher in <region>
  ✓ THIS IS EXPECTED  HTTP 202 (pending admin approval). The platform accepted the delete and queued it for an administrator, because it protects backed-up resources from deletion. It is not a failure.
- ✓ ON THE WALL      your row disappears. The estate is back to the six services it had when you opened it in Setup.
- ⏱ HOW LONG         about four minutes
- ✗ IF NOT           a stall almost always means something still holds a lock on the resource group. If it ends with `teardown stopped: terraform destroy exited`, your row stays on the wall on purpose, because the VM may still exist and bill. Either way, read the Terraform error, then run it again: teardown checks whether each resource exists before deleting it, so running it twice is safe.
+ ✓ ON THE WALL      Your row disappears. The estate is back to the six services it had when you opened it in Setup.
+ ⏱ HOW LONG         About four minutes
+ ✗ IF NOT           A stall almost always means something still holds a lock on the resource group. If it ends with `teardown stopped: terraform destroy exited`, your row stays on the wall on purpose, because the VM may still exist and bill. Either way, read the Terraform error, then run it again: teardown checks whether each resource exists before deleting it, so running it twice is safe.
 ```
 
 Your row disappeared only because teardown removed it. Nothing on a dashboard
@@ -1409,14 +1455,13 @@ reusing it attaches the old VM group to a machine that no longer exists.
 ### Verify it is gone
 
 ```bash
-RG="$TF_VAR_resource_group"
-az resource list --resource-group "$RG" --query "length(@)" -o tsv
+az resource list --resource-group "$TF_VAR_resource_group" --query "length(@)" -o tsv
 ```
 
 ```
- ✓ YOU SHOULD SEE   a single number, and it is zero. The first line sets a variable and prints nothing.
+ ✓ YOU SHOULD SEE   The command prints a single number, and it is zero.
                     0
- ✗ IF NOT           a number above zero means teardown missed something. Run `az resource list --resource-group "$RG" -o table` to see what is left, then run the teardown again. An error instead of a number means the login expired or this terminal has not loaded `.env`. Open a new terminal, sign in again with the block from Setup, and run this step again.
+ ✗ IF NOT           A number above zero means teardown missed something. Run `az resource list --resource-group "$TF_VAR_resource_group" -o table` to see what is left, then run the teardown again. An error instead of a number means the login expired or this terminal has not loaded `.env`. Open a new terminal, sign in again with the command from Setup, and run this step again.
 ```
 
 The count covers only your resource group, because other participants share
@@ -1427,7 +1472,7 @@ terraform -chdir=infra/workloads state list | wc -l
 ```
 
 ```
- ✓ YOU SHOULD SEE   zero resources left in state
+ ✓ YOU SHOULD SEE   The command prints 0, because Terraform no longer tracks any resources.
                     0
  ✗ IF NOT           Terraform still tracks resources. Run the teardown command again, then repeat both checks.
 ```
