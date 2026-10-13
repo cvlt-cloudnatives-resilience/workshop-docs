@@ -148,6 +148,11 @@ facilitated session most of this is done for you.
                             your facilitator. They go in `.env`, which you
                             create by renaming `.env.example`.
 
+                            The Commvault pair is issued to you alone. It
+                            rotates each time it renews, so a pair shared
+                            with anyone, or pasted into a second Codespace,
+                            stops working for whoever renews second.
+
                             The Azure credential is a service principal
                             scoped to ONE resource group, issued to you. It
                             cannot reach anything else in the subscription,
