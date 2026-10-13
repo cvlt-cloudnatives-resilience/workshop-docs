@@ -303,10 +303,12 @@ lab, and they cause most problems.
                                pasted without its quotes is the usual cause.
  CV_ACCESS_TOKEN not set       `.env` is missing or was not saved. Run
                                `ls .env` from the repository root.
- missing workshop.yaml         The file was deleted or renamed. It is
-                               tracked, so `git checkout config/workshop.yaml`
-                               restores it. There is nothing to fill in: your
-                               own values are in `.env`.
+ missing                       `missing …/config/workshop.yaml` means you are
+                               not in the lab folder. Run
+                               `cd /workspaces/resops-lab` and try again. If
+                               the file was deleted, it is tracked in git, so
+                               `git checkout config/workshop.yaml` restores
+                               it. There is nothing to fill in.
  no `workload` output          `terraform apply` has not run, or ran in a
                                different directory. Run it from the repository
                                root.
@@ -324,6 +326,19 @@ lab, and they cause most problems.
                                worker that moves backup data. This usually
                                takes a few minutes and occasionally much
                                longer. Do not stop the command.
+ lost contact with Commvault   Six reads of a job's status failed in a row.
+                               The job may still be running. Check the job id
+                               in Command Center before you run the command
+                               again, or a second job starts. A few
+                               `read failed, retrying` lines on their own are
+                               normal: the command keeps going.
+ could not reach Commvault     A network error. Check the Codespace is online,
+                               then run the command again. `did not answer
+                               within 120s` is the same advice.
+ RESOPS_DEBUG=1                Any other error ends by suggesting this. Run
+                               the command again with `RESOPS_DEBUG=1` in
+                               front of it and show the output to your
+                               facilitator.
  No suitable access node       A threat scan found no free scanning worker.
                                Nothing is wrong with your workload: run the
                                scan once more. If it fails the same way, tell
@@ -559,7 +574,7 @@ op backup infra/workloads
                     backup job 8210418 on group 12345…
                     backup Completed
  ⏱ HOW LONG         About two minutes
- ✗ IF NOT           If it sits on "Waiting", the job is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command.
+ ✗ IF NOT           If it sits on "Waiting", the job is queued for a media agent, the worker that moves backup data. That is normal and not a failure. Do not stop the command. If it stops with `lost contact with Commvault`, check the job in Command Center before you run the command again, so that you do not start a second backup.
 ```
 
 ```
@@ -611,7 +626,10 @@ op restore infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   The restore job completes, the restored VM is checked in Azure, and the command prints a verdict block. The `attestation` line is the result. The lines under it show what the check found inside the copy and where the result was saved.
+ ✓ YOU SHOULD SEE   The command runs its pre-flight checks, the restore job completes, the restored VM is checked in Azure, and the command prints a verdict block. The `attestation` line is the result. The lines under it show what the check found inside the copy and where the result was saved.
+                    Pre-flight: leftover restored VM
+                      none
+                    ...
                     === DRILL VERDICT ===
                       job status : Completed
                       azure VM   : PASS — exists & running
@@ -620,7 +638,7 @@ op restore infra/workloads
                                    3 customer records, no encryption
                                    markers, write/read verified
                                    → evidence/attestations/<your-codename>.json
- ✓ THEN IT WAITS    The drill pauses and asks you to press Enter before it deletes the restored copy. It is not stuck: the copy is running in Azure, and this is the only time it exists. Press Enter when you are ready.
+ ✓ THEN IT WAITS    The drill pauses and asks you to press Enter before it deletes the restored copy. It is not stuck: the copy is running in Azure, and this is the only time it exists. Press Enter when you are ready. If you press Ctrl-C instead, the drill still deletes the copy so that it does not keep billing.
                     ✓ RECOVERED: <your-codename>-restore is running in
                       Azure (RG rg-lab-<your-handle>).
                     Press Enter to tear it down…
@@ -1434,15 +1452,18 @@ PYTHONUNBUFFERED=1 op teardown infra/workloads
 ```
 
 ```
- ✓ YOU SHOULD SEE   Four things happen in order: the backup platform's group is queued for deletion, leftover snapshots are swept, Terraform destroys the rest, and an auto-created network watcher is removed.
+ ✓ YOU SHOULD SEE   The command first asks you to confirm. Type `y` and press Enter. Then it queues the Commvault VM group for deletion, removes leftover snapshots and any restored copy a drill left behind, and runs Terraform destroy.
+                    Delete <your-codename>, its Commvault group and everything
+                    Terraform built? [y/N] y
                     CV group ##### delete → HTTP 202 (pending admin approval)
                     swept GXMD snapshot: <name>
+                    VM <your-codename>-restore not found in
+                    rg-lab-<your-handle> — nothing to tear down.
                     Destroy complete!
-                    removed auto-created NetworkWatcher in <region>
- ✓ THIS IS EXPECTED  HTTP 202 (pending admin approval). The platform accepted the delete and queued it for an administrator, because it protects backed-up resources from deletion. It is not a failure.
+ ✓ THIS IS EXPECTED  Three lines here are normal. The confirmation question protects you from deleting by accident. `HTTP 202 (pending admin approval)` means the platform accepted the delete and queued it for an administrator, because it protects backed-up resources from deletion. `not found … nothing to tear down` means the restore drill already deleted its copy.
  ✓ ON THE WALL      Your row disappears. The estate is back to the six services it had when you opened it in Setup.
  ⏱ HOW LONG         About four minutes
- ✗ IF NOT           A stall almost always means something still holds a lock on the resource group. If it ends with `teardown stopped: terraform destroy exited`, your row stays on the wall on purpose, because the VM may still exist and bill. Either way, read the Terraform error, then run it again: teardown checks whether each resource exists before deleting it, so running it twice is safe.
+ ✗ IF NOT           `teardown cancelled. Nothing was deleted.` means you did not type `y`: run the command again. A stall almost always means something still holds a lock on the resource group. If it ends with `teardown stopped: terraform destroy exited`, your row stays on the wall on purpose, because the VM may still exist and bill. Either way, read the Terraform error, then run it again: teardown checks whether each resource exists before deleting it, so running it twice is safe.
 ```
 
 Your row disappeared only because teardown removed it. Nothing on a dashboard
