@@ -169,21 +169,34 @@ facilitator retires the lab.
 
 ### How to read the commands on this page
 
+Every numbered step is one of two things. Everything that is not a
+numbered step is explanation: read it, but there is nothing to run.
+
 ```list
- $ at the start     A command for you to run. The `$` is the prompt and is
-                    not part of the command; the copy button gives you the
-                    command without it.
- op                 The write lane, and `resops` the read-only one.
-                    Both are real commands on your PATH; type them exactly
-                    as printed. `infra/workloads` is the final argument to
-                    every `op` command and never changes.
- no $               Output from the machine. You do not type these lines.
- angle brackets     A placeholder, carrying your own workload name. It
-                    appears in expected output, never inside a command, so
-                    every command on this page is the same for everyone.
- ✓                  What the command should print. Compare, do not guess.
- ✗                  What to do when it does not. Every one names an action.
- ⏱                  How long it takes, and what is happening while you wait.
+ ▶ Run in your terminal   A command. Click the block to copy it, paste it into
+                          the terminal, and press Enter. The `$` is the prompt
+                          and is not copied.
+ ✎ Do this                An action outside the terminal, such as editing a
+                          file or clicking in a web console.
+ ✓ You should see         What the command prints, so you can compare. Text in
+                          the dashed box tagged **output, do not type** is the
+                          machine's answer. Never paste it back in.
+ ✗ If not                 What to do when the output does not match.
+ ⏱ How long               How long it takes, and what happens while you wait.
+ angle brackets           A placeholder for your own name, such as
+                          `<your-codename>`. It appears in output, never in a
+                          command, so every command is the same for everyone.
+```
+
+Two rules hold for every command in this workshop:
+
+```list card
+ where     Run it from the repository root, `/workspaces/resopsv2-demo`. A new
+           terminal starts there. If you have used `cd`, run
+           `cd /workspaces/resopsv2-demo` first.
+ op        Every `op` command ends with `infra/workloads`, the folder that
+           holds your Terraform. `op validate` on its own prints a usage line
+           and does nothing.
 ```
 
 ### Prove your machine is ready
@@ -196,7 +209,7 @@ which op resops
  ✓ YOU SHOULD SEE   two paths, both inside the Codespace. That is the whole check.
                     /workspaces/resopsv2-demo/.venv/bin/op
                     /workspaces/resopsv2-demo/.venv/bin/resops
- ✗ IF NOT           setup had not finished when this terminal opened. Run bash .devcontainer/postCreate.sh, then open a new terminal. In a room, ask now rather than when the first command runs.
+ ✗ IF NOT           `op: command not found` means the Python environment is not on your PATH. Run `source .venv/bin/activate` and try again. If that says No such file or directory, setup did not finish: run `bash .devcontainer/postCreate.sh`, then open a new terminal. In a room, ask now rather than when the first command runs.
 ```
 
 ### Create your .env
@@ -211,35 +224,50 @@ mv .env.example .env
  ✓ YOU SHOULD SEE   nothing.
 ```
 
-Open `.env`, copy your five credentials into it from the credentials file
-your facilitator gave you, and save it.
+```do
+1. Open `.env` in the editor.
+2. Copy your five credentials into it from the credentials file your
+   facilitator gave you. Keep the quotes around `ARM_CLIENT_SECRET`.
+3. Save the file.
+```
 
 ### Fill in workshop.yaml
 
-Open `config/workshop.yaml`. Under `workload`, fill in the three fields
-marked FILL with the values from your credentials file, then save the file.
+Your credentials file lists the three values under **Your three FILL fields
+in config/workshop.yaml**. Copy them exactly.
 
-```list
- name               your codename
- resource_group     your resource group
- attestation_file   your attestation path, which ends in your codename
+```do
+1. Open `config/workshop.yaml`.
+2. Under `workload`, replace the three values marked FILL:
+   `name`, `resource_group` and `attestation_file`.
+3. Save the file.
+```
+
+```
+ ✓ YOU SHOULD SEE   the three lines, with your own values in place of the placeholders.
+                      name: "<your-codename>"
+                      resource_group: "rg-lab-<your-handle>"
+                      attestation_file: evidence/attestations/<your-codename>.json
+ ✗ IF NOT           the `attestation_file` name must match `name` exactly, or a passing restore drill still reads as a gap.
 ```
 
 ### Load your credentials
 
-Once your files are filled in, load `.env` into your terminal.
+Load `.env` into this terminal. The `set -a` part exports every value, so
+Terraform and `op` can read them as well as the shell.
 
 ```bash
-source .env
+set -a; source .env; set +a
 ```
 
 ```
  ✓ YOU SHOULD SEE   nothing.
+ ✗ IF NOT           `No such file or directory` means you are not in the repository root, or `.env` was not created. Run `cd /workspaces/resopsv2-demo`, then `ls .env`. Run this line again after any edit to `.env`.
 ```
 
 ### Sign in, and check what you filled in
 
-Terraform reads `ARM_*` from `.env` by itself. The `az` CLI does not, and
+Terraform reads the `ARM_*` values you exported. The `az` CLI does not, and
 several checks in this workshop go through it. One block does both: sign in,
 then read your own config back.
 
@@ -271,11 +299,11 @@ Your terminal shows one workload at a time. The other screen shows all of
 them at once, and it is the one your organization would actually look at.
 Open it now, while nothing has moved, so you have seen the starting state.
 
-```list
- where              the Ports tab in your Codespace, port 3000. It is
-                    labeled Grafana — ResOps dashboard.
- sign in            `admin` / `resops`
- the dashboard      ResOps → DevOps Meets ResOps
+```do
+1. Open the **Ports** tab in your Codespace and open port 3000, labeled
+   Grafana, ResOps dashboard.
+2. Sign in as `admin`, password `resops`.
+3. Open **ResOps → DevOps Meets ResOps**.
 ```
 
 ```
@@ -302,9 +330,35 @@ alone: they change nothing, so they claim nothing.
 ### When something fails
 
 Search this page for the text your terminal printed. The left column is the
-error, verbatim.
+error, verbatim. Most failures in a session came from the first five rows,
+which are about the terminal, not the lab.
 
 ```list
+ op: command not found         The Python environment is not on your PATH.
+                               Run `source .venv/bin/activate`. If that file
+                               is missing, run `bash .devcontainer/postCreate.sh`
+                               and open a new terminal.
+ usage: op                     The command is missing `infra/workloads`. Every
+                               `op` command ends with it, for example
+                               `op validate infra/workloads`.
+ not yet applied               `terraform not yet applied in infra/workloads`
+                               means `terraform apply` has not run, or you
+                               are not in the repository root. Run
+                               `cd /workspaces/resopsv2-demo` and try again.
+ terraform init                Terraform asks you to run init, or reports
+                               missing plugins or an inconsistent lock file.
+                               Run `terraform -chdir=infra/workloads init
+                               -input=false` from the repository root. A
+                               plain `terraform init` in the root does not
+                               count, because the Terraform lives in
+                               `infra/workloads`.
+ Please run 'az login'         Terraform cannot see your `ARM_*` values,
+                               because `.env` was loaded without exporting.
+                               Run `set -a; source .env; set +a`.
+ az not logged in              Run the sign-in block in Setup again. A secret
+                               pasted without its quotes is the usual cause.
+ CV_ACCESS_TOKEN not set       `.env` is missing or was not saved. Run
+                               `ls .env` from the repository root.
  missing workshop.yaml         The file was deleted or renamed. It is
                                tracked, so `git checkout config/workshop.yaml`
                                restores it. Fill your three fields again.
@@ -340,9 +394,9 @@ error, verbatim.
 and tell you so; `op status` needs a working one.
 
 ```
- op validate     Does your config parse, and are the ids present?
- op preflight    Can this machine reach Azure and the tenant?
- op status       What does the platform currently believe about your workload?
+ op validate infra/workloads     Does your config parse, and are the ids present?
+ op preflight infra/workloads    Can this machine reach Azure and the tenant?
+ op status infra/workloads       What does the platform believe about your workload?
 ```
 
 ### Three questions, before anything runs
@@ -492,14 +546,14 @@ API token is refused here by design, and depending on how your account is set
 up the console may refuse you too. If it does, your facilitator runs it once
 for the room.
 
-```list
- 1   Sign in to Command Center and open **Protect**, then **Virtualization**,
-     then your Azure connection. Its name is in your session instructions,
-     or in your own config as `platform.hypervisor.name`.
- 2   Click **Start discovery**.
- 3   Wait for **Last update**, at the top of the page, to change to the
-     current time with a green check beside it.
- 4   Open the **Resources** tab and filter by your connection.
+```do
+1. Sign in to Command Center and open **Protect**, then **Virtualization**,
+   then your Azure connection. Its name is in your session instructions,
+   or in your own config as `platform.hypervisor.name`.
+2. Click **Start discovery**.
+3. Wait for **Last update**, at the top of the page, to change to the
+   current time with a green check beside it.
+4. Open the **Resources** tab and filter by your connection.
 ```
 
 ```

@@ -84,7 +84,7 @@
   /* A TERMINAL IS MIDNIGHT IN BOTH THEMES. This said var(--ink), which
      was only ever right while ink meant Midnight: in dark mode ink is
      Fog, and the terminal block came out pale with ghost text on it. */
-  background: var(--aura-base); border: 1px solid var(--aura-base);
+  background: var(--aura-base); border: 2px solid var(--cmd-edge);
   border-radius: var(--radius-md); margin: 12px 0; overflow: hidden;
   cursor: pointer; transition: box-shadow 160ms ease, border-color 160ms ease;
 }
@@ -92,10 +92,10 @@
 .cmd-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: 7px 14px; font-family: var(--f-mono); font-size: 12px;
-  color: var(--topbar-dim);
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--on-dark); font-weight: 700; letter-spacing: 0.04em;
+  background: var(--cmd-edge);
 }
+.cmd-head span::before { content: "\25B6"; margin-right: 8px; font-size: 10px; }
 /* Commands WRAP, they do not scroll sideways. `az login --service-principal`
    is 96 characters and clipped at the container edge, and macOS draws no
    scrollbar until you scroll — so the tail of the longest command on the page
@@ -112,8 +112,8 @@
   content: "$"; color: var(--prompt); margin-right: 10px;
 }
 .copy {
-  font: inherit; color: var(--topbar-dim); background: none;
-  border: 1px solid rgba(255, 255, 255, 0.18); border-radius: var(--radius-sm);
+  font: inherit; font-weight: 400; color: var(--on-dark); background: none;
+  border: 1px solid rgba(255, 255, 255, 0.45); border-radius: var(--radius-sm);
   padding: 2px 9px; cursor: pointer;
   transition: color 160ms ease, border-color 160ms ease,
               background-color 160ms ease;
@@ -152,8 +152,22 @@
 .diag-no .diag-label { color: var(--no); }
 .diag-clock .diag-label { color: var(--clock); }
 .diag-mark { margin-right: 7px; }
-.diag-row pre { margin-top: 6px; overflow-x: auto; line-height: 1.55;
-  color: var(--ink); }
+.diag-row pre { margin-top: 8px; overflow-x: auto; line-height: 1.55;
+  color: var(--ink); background: var(--out-bg); padding: 8px 12px;
+  border: 1px dashed var(--clock); border-radius: var(--radius-sm); }
+.diag-tag { margin-left: 10px; padding: 1px 7px; font-weight: 400;
+  letter-spacing: 0; color: var(--clock); border: 1px solid var(--clock);
+  border-radius: var(--radius-sm); }
+
+/* ---- do card: an action outside the terminal (edit a file, click) ---- */
+.do { margin: 12px 0 18px; border: 2px dashed var(--accent);
+  border-radius: var(--radius-md); background: var(--accent-soft); }
+.do-head { padding: 7px 14px 0; font-family: var(--f-mono); font-size: 12px;
+  font-weight: 700; letter-spacing: 0.04em; color: var(--accent); }
+.do-head::before { content: "\270E"; margin-right: 8px; }
+.do-body { padding: 4px 14px 12px; }
+.do-body p, .do-body ol { margin: 6px 0 0; }
+.do-body ol { padding-left: 1.4em; }
 .diag-text { margin: 6px 0 0; color: var(--ink); }
 .v-yes { color: var(--yes); font-weight: 700; }
 .v-no { color: var(--no); font-weight: 700; }

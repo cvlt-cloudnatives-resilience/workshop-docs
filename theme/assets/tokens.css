@@ -36,6 +36,9 @@
   --no-tint:     #fdf2f5;   /* 94% tint of Rose */
   --clock:       #707391;   /* Midnight tint */
   --clock-tint:  #f7f7f7;   /* 62% tint of Fog */
+  --cmd-edge:    #844896;   /* Crocus in BOTH themes: a command must not
+                               take the page's own Midnight in dark mode */
+  --out-bg:      #ffffff;   /* quoted output sits on its own screen */
 
   --code-bg:     #f6f6f6;   /* 55% tint of Fog */
   --code-border: #eaeaea;   /* Fog */
@@ -186,6 +189,7 @@
   --no-tint:     #13083f;   /* Midnight with 8% Rose */
   --clock:       #8b90b3;
   --clock-tint:  #0a0f33;
+  --out-bg:      #1c2154;   /* Midnight, lifted: the hairline value */
 
   --code-bg:     #0a1046;   /* Midnight, lifted, so a code block reads as a
                                surface rather than a hole */
@@ -215,6 +219,7 @@
   --no-tint:     #13083f;   /* Midnight with 8% Rose */
   --clock:       #8b90b3;
   --clock-tint:  #0a0f33;
+  --out-bg:      #1c2154;   /* Midnight, lifted: the hairline value */
 
   --code-bg:     #0a1046;   /* Midnight, lifted, so a code block reads as a
                                surface rather than a hole */

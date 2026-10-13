@@ -10,8 +10,8 @@ Two build modes from one markdown:
         checkpoint rides on the next rendered page as what the
         participant arrives holding. Chapters are numbered per build.
 
-The step rail: within a page, each command block opens a numbered step and
-everything until the next command belongs to it. Derived purely from the
+The step rail: within a page, each command or do block opens a numbered
+step and everything until the next one belongs to it. Derived purely from the
 order authored in the markdown.
 """
 
@@ -85,6 +85,8 @@ def render_nodes(nodes, images, mode='solo', icons=None):
             out.append(f'<h2 class="section">{inline(node[1])}</h2>')
         elif kind == "cmd":
             out.append(render_cmd(node[1]))
+        elif kind == "do":
+            out.append(render_do(node[1]))
         elif kind == "diag":
             out.append(render_diag(node[1]))
         elif kind == "aside":
@@ -113,9 +115,25 @@ def render_nodes(nodes, images, mode='solo', icons=None):
 
 def render_cmd(code):
     return ('<div class="cmd" data-copy>'
-            '<div class="cmd-head"><span>terminal</span>'
+            '<div class="cmd-head"><span>Run in your terminal</span>'
             '<button class="copy" type="button">copy</button></div>'
             f"<pre><code>{esc(code)}</code></pre></div>")
+
+
+def render_do(blocks):
+    """A manual step: something the participant does outside the terminal."""
+    body, items = [], []
+    for kind, text in blocks + [("end", "")]:
+        if kind != "item" and items:
+            body.append("<ol>" + "".join(f"<li>{inline(i)}</li>" for i in items)
+                        + "</ol>")
+            items = []
+        if kind == "item":
+            items.append(text)
+        elif kind == "p":
+            body.append(f"<p>{inline(text)}</p>")
+    return ('<div class="do"><div class="do-head">Do this</div>'
+            f'<div class="do-body">{"".join(body)}</div></div>')
 
 
 def render_diag(rows):
@@ -154,10 +172,12 @@ def render_diag(rows):
                 chunks.append(
                     f'<p class="diag-text">{verdicts(inline(flowed))}</p>')
         content = "".join(chunks)
+        tag = ('<span class="diag-tag">output, do not type</span>'
+               if row["glyph"] == "✓" and row["cont"] else "")
         parts.append(
             f'<div class="diag-row diag-{cls}">'
             f'<p class="diag-label"><span class="diag-mark">{row["glyph"]}'
-            f"</span>{esc(sentence(row['label']))}</p>{content}</div>")
+            f"</span>{esc(sentence(row['label']))}{tag}</p>{content}</div>")
     parts.append("</aside>")
     return "\n".join(parts)
 
@@ -287,7 +307,7 @@ def render_body(nodes, images, mode='solo', icons=None):
 
     for node in nodes:
         kind = node[0]
-        if kind == "cmd":
+        if kind in ("cmd", "do"):
             flush_step()
             if not rail_open:
                 parts.append('<div class="steps">')

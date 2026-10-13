@@ -88,6 +88,11 @@ parser, never hand-edit the HTML.
 ````
 ```bash            a participant command. gets a terminal block with a
                    copy button; opens a numbered step on the page
+```do              an action outside the terminal: edit a file, click in a
+                   console. Renders as a dashed "Do this" card and opens a
+                   numbered step like ```bash. `1. ` lines become a
+                   numbered list; other lines flow as prose. No ✓ is
+                   required, but one may follow
 ``` starting ✓✗⏱   the diagnostic rows: ✓ expected output, ✗ what to do
                    if not, ⏱ how long it takes. THE SYNTAX IS EXACT:
                    the glyph must be ✓ ✗ or ⏱ (not ✅ ❌ ✔), the label

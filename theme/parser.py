@@ -19,6 +19,10 @@ The dialect:
   ---                           separator (ignored)
   ![caption](images/x.png)      figure, inlined as a data URI at build
   ```bash fences                participant commands
+  ```do fences                  a manual action outside the terminal (edit
+                                a file, click in a console). Opens a step
+                                like ```bash; `1. ` lines become a numbered
+                                list, other lines flow as prose
   ``` starting ✓/✗/⏱            diagnostic rows (expected / if-not / timing)
   ```hero fences                a terminal transcript for the masthead. One
                                 per workshop, authored in the front matter,
@@ -165,10 +169,12 @@ def classify_fence(lang, body, fence_line):
         return ("statement", [l.strip() for l in body if l.strip()])
     if lang in ("list", "list card"):
         return ("deflist", list_rows(body, fence_line + 1), lang == "list card")
+    if lang == "do":
+        return ("do", do_blocks(body, fence_line + 1))
     if lang != "":
         raise SystemExit(
             f"line {fence_line}: unknown fence language {lang!r}; the "
-            "dialect knows ```bash, ```list, ```list card, ```statement, "
+            "dialect knows ```bash, ```do, ```list, ```list card, ```statement, "
             "```hero and plain fences only")
     first = next((l.strip() for l in body if l.strip()), "")
     if first and first[0] in GLYPHS:
@@ -353,6 +359,28 @@ def labeled(body, kind, marker_len):
         else:
             parts.append(("pre", dedent(block)))
     return (kind, title, parts)
+
+
+def do_blocks(body, body_start):
+    """Paragraphs and `1. ` numbered items. Wrapped prose joins its
+    paragraph; an item continues on indented lines."""
+    out = []
+    for idx, raw in enumerate(dedent(body).split("\n")):
+        line = raw.strip()
+        m = re.match(r"^\d+\.\s+(.*)$", line)
+        if not line:
+            out.append(("gap", ""))
+        elif m:
+            out.append(("item", m.group(1)))
+        elif out and (out[-1][0] == "p"
+                      or (out[-1][0] == "item" and raw[:1] == " ")):
+            out[-1] = (out[-1][0], out[-1][1] + " " + line)
+        else:
+            out.append(("p", line))
+    blocks = [b for b in out if b[0] != "gap"]
+    if not blocks:
+        raise SystemExit(f"line {body_start}: a ```do fence is empty")
+    return blocks
 
 
 def dedent(block):
